@@ -1,20 +1,19 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, Text, Alert, StyleSheet, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
 import { useRouter } from "expo-router";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 
-const RegisterScreen = () => {
+const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  const handleRegister = async () => {
+  const handleLogin = async () => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await sendEmailVerification(userCredential.user); // Enviar correo de verificación
-      Alert.alert("Cuenta creada", "Se ha enviado un correo de verificación. Revisa tu bandeja.");
-      router.push("/login");
+      await signInWithEmailAndPassword(auth, email, password);
+      Alert.alert("Bienvenido", "Has iniciado sesión.");
+      router.push("/bienvenida");
     } catch (error) {
       const errorMessage = (error as Error).message;
       Alert.alert("Error", errorMessage);
@@ -29,7 +28,7 @@ const RegisterScreen = () => {
     >
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
         <View style={styles.formContainer}>
-          <Text style={styles.title}>Registro</Text>
+          <Text style={styles.title}>Inicio de Sesión</Text>
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"
@@ -47,8 +46,8 @@ const RegisterScreen = () => {
             secureTextEntry
             placeholderTextColor="#B39DDB"
           />
-          <Button title="Registrarse" onPress={handleRegister} color="#7E57C2" />
-          <Button title="¿Ya tienes cuenta? Inicia Sesión" onPress={() => router.push("/login")} color="#B39DDB" />
+          <Button title="Iniciar Sesión" onPress={handleLogin} color="#7E57C2" />
+          <Button title="¿No tienes cuenta? Regístrate" onPress={() => router.push("/")} color="#B39DDB" />
         </View>
       </KeyboardAvoidingView>
     </ImageBackground>
@@ -91,4 +90,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterScreen;
+export default LoginScreen;
