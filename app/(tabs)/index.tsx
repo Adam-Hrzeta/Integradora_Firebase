@@ -1,25 +1,9 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, Text, Alert, StyleSheet, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
+import React from "react";
+import { View, Text, Button, StyleSheet, ImageBackground } from "react-native";
 import { useRouter } from "expo-router";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { auth } from "../firebase";
 
-const RegisterScreen = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const WelcomeScreen = () => {
   const router = useRouter();
-
-  const handleRegister = async () => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await sendEmailVerification(userCredential.user); // Enviar correo de verificación
-      Alert.alert("Cuenta creada", "Se ha enviado un correo de verificación. Revisa tu bandeja.");
-      router.push("/login");
-    } catch (error) {
-      const errorMessage = (error as Error).message;
-      Alert.alert("Error", errorMessage);
-    }
-  };
 
   return (
     <ImageBackground
@@ -27,30 +11,17 @@ const RegisterScreen = () => {
       style={styles.background}
       blurRadius={10}
     >
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.formContainer}>
-          <Text style={styles.title}>Registro</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Correo electrónico"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholderTextColor="#B39DDB"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Contraseña"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#B39DDB"
-          />
-          <Button title="Registrarse" onPress={handleRegister} color="#7E57C2" />
-          <Button title="¿Ya tienes cuenta? Inicia Sesión" onPress={() => router.push("/login")} color="#B39DDB" />
+          <Text style={styles.title}>Bienvenido</Text>
+          <Text style={styles.subtitle}>Por favor, selecciona una opción para continuar</Text>
+          <View style={styles.buttonContainer}>
+            <Button title="Iniciar Sesión" onPress={() => router.push("/login")} color="#7E57C2" />
+            <View style={styles.buttonSpacer} />
+            <Button title="Registrarse" onPress={() => router.push("/register")} color="#B39DDB" />
+          </View>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </ImageBackground>
   );
 };
@@ -79,16 +50,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#FFF',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#FFF',
     marginBottom: 20,
   },
-  input: {
-    height: 40,
-    borderBottomColor: '#7E57C2',
-    borderBottomWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 8,
-    color: '#FFF',
+  buttonContainer: {
+    width: '100%',
+  },
+  buttonSpacer: {
+    height: 10,
   },
 });
 
-export default RegisterScreen;
+export default WelcomeScreen;
