@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Image, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { auth } from "../firebase";
-import { updatePassword, updateEmail, updateProfile, User } from "firebase/auth";
+import { updatePassword, updateEmail, updateProfile } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 
 const ProfileScreen = () => {
@@ -10,26 +10,30 @@ const ProfileScreen = () => {
   const [newPassword, setNewPassword] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(auth.currentUser);
   const router = useRouter();
 
-  const user = auth.currentUser;
-
   useEffect(() => {
-    if (user) {
-      console.log("Usuario autenticado:", user.email); // Depuración
-      setEmail(user.email || "");
-      setProfileImage(user.photoURL || "https://via.placeholder.com/150"); // Imagen por defecto
-    } else {
-      console.log("No hay usuario autenticado."); // Depuración
-    }
-  }, [user]);
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log("Usuario autenticado:", user.email); // Depuración
+        setUser(user);
+        setEmail(user.email || "");
+        setProfileImage(user.photoURL || "https://via.placeholder.com/150");
+      } else {
+        console.log("No hay usuario autenticado."); // Depuración
+        router.push("/login"); // Redirige al usuario a la pantalla de inicio de sesión
+      }
+    });
+
+    return () => unsubscribe(); // Limpia el listener al desmontar el componente
+  }, [router]);
+
+  if (!user) {
+    return <Text>Cargando...</Text>; // Muestra un mensaje de carga mientras se verifica la autenticación
+  }
 
   const handleUpdateEmail = async () => {
-    if (!user) {
-      Alert.alert("Error", "No hay un usuario autenticado.");
-      return;
-    }
-
     if (!email) {
       Alert.alert("Error", "El correo electrónico no puede estar vacío.");
       return;
@@ -51,11 +55,6 @@ const ProfileScreen = () => {
   };
 
   const handleUpdatePassword = async () => {
-    if (!user) {
-      Alert.alert("Error", "No hay un usuario autenticado.");
-      return;
-    }
-
     if (!newPassword) {
       Alert.alert("Error", "La nueva contraseña no puede estar vacía.");
       return;
@@ -78,11 +77,6 @@ const ProfileScreen = () => {
   };
 
   const handleUpdateProfileImage = async () => {
-    if (!user) {
-      Alert.alert("Error", "No hay un usuario autenticado.");
-      return;
-    }
-
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Permiso denegado", "Necesitas permitir el acceso a la galería para cambiar la imagen.");
@@ -133,11 +127,7 @@ const ProfileScreen = () => {
 
         {/* Correo electrónico */}
         <Text style={styles.label}>Correo electrónico:</Text>
-        {user ? (
-          <Text style={styles.emailText}>{email}</Text>
-        ) : (
-          <Text style={styles.emailText}>No hay un usuario autenticado.</Text>
-        )}
+        <Text style={styles.emailText}>{email}</Text>
 
         {/* Nueva contraseña */}
         <TextInput
