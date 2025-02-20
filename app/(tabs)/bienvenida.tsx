@@ -54,18 +54,6 @@ const ParkingSpotPicker: React.FC = () => {
           ))}
         </View>
       </View>
-
-      {/* Botón de continuar */}
-      <TouchableOpacity
-        style={[
-          styles.continueButton,
-          { opacity: selectedSpot ? 1 : 0.5 },
-        ]}
-        disabled={!selectedSpot}
-        onPress={() => console.log('Continue')}
-      >
-        <Text style={styles.continueButtonText}>Continue</Text>
-      </TouchableOpacity>
     </View>
   );
 };
