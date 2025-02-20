@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Image, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import { auth } from "../firebase";
+import { auth } from "../dataSource";
 import { updatePassword, updateEmail, updateProfile } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 
@@ -30,7 +30,7 @@ const ProfileScreen = () => {
   }, [router]);
 
   if (!user) {
-    return <Text>Cargando...</Text>; // Muestra un mensaje de carga mientras se verifica la autenticación
+    return <Text>Inicie sesión para acceder a su perfil...</Text>; // Muestra un mensaje de carga mientras se verifica la autenticación
   }
 
   const handleUpdateEmail = async () => {
