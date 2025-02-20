@@ -73,7 +73,7 @@ export default function Layout() {
           }}
         />
         <Drawer.Screen
-          name="bienvenida" // This is the name of the page and must match the url from root
+          name="dashboard" // This is the name of the page and must match the url from root
           options={{
             drawerLabel: 'Estacionamiento',
             title: 'Estacionamiento',
