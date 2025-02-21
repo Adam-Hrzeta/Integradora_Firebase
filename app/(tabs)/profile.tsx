@@ -5,6 +5,9 @@ import { auth } from "../dataSource";
 import { updatePassword, updateEmail, updateProfile } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 
+
+
+//falta incorporar el componente modal urivic
 const ProfileScreen = () => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
