@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Image, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import { 
+  View, Text, TextInput, Button, Image, StyleSheet, 
+  Alert, ActivityIndicator, Modal, TouchableOpacity 
+} from "react-native";
 import { useRouter } from "expo-router";
 import { auth } from "../dataSource";
 import { updatePassword, updateEmail, updateProfile } from "firebase/auth";
@@ -10,41 +13,43 @@ import * as ImagePicker from "expo-image-picker";
 //falta incorporar el componente modal urivic
 const ProfileScreen = () => {
   const [email, setEmail] = useState("");
+  const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(auth.currentUser);
+  const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log("Usuario autenticado:", user.email); // Depuración
         setUser(user);
         setEmail(user.email || "");
         setProfileImage(user.photoURL || "https://via.placeholder.com/150");
       } else {
-        console.log("No hay usuario autenticado."); // Depuración
-        router.push("/login"); // Redirige al usuario a la pantalla de inicio de sesión
+        router.push("/login"); 
       }
     });
 
-    return () => unsubscribe(); // Limpia el listener al desmontar el componente
+    return () => unsubscribe();
   }, [router]);
 
   if (!user) {
-    return <Text>Inicie sesión para acceder a su perfil...</Text>; // Muestra un mensaje de carga mientras se verifica la autenticación
+    return <Text>Inicie sesión para acceder a su perfil...</Text>;
   }
 
   const handleUpdateEmail = async () => {
-    if (!email) {
+    if (!newEmail) {
       Alert.alert("Error", "El correo electrónico no puede estar vacío.");
       return;
     }
 
     try {
       setLoading(true);
-      await updateEmail(user, email);
+      await updateEmail(user, newEmail);
+      setEmail(newEmail);
+      setModalVisible(false);
       Alert.alert("Éxito", "Correo electrónico actualizado correctamente.");
     } catch (error) {
       if (error instanceof Error) {
@@ -66,8 +71,8 @@ const ProfileScreen = () => {
     try {
       setLoading(true);
       await updatePassword(user, newPassword);
-      Alert.alert("Éxito", "Contraseña actualizada correctamente.");
       setNewPassword("");
+      Alert.alert("Éxito", "Contraseña actualizada correctamente.");
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert("Error", error.message);
@@ -117,20 +122,15 @@ const ProfileScreen = () => {
         <Text style={styles.title}>Perfil de Usuario</Text>
 
         {/* Imagen de perfil */}
-        <Image
-          source={{ uri: profileImage || "https://via.placeholder.com/150" }}
-          style={styles.profileImage}
-        />
+        <Image source={{ uri: profileImage || "https://via.placeholder.com/150" }} style={styles.profileImage} />
 
-        <Button
-          title="Cambiar Imagen de Perfil"
-          onPress={handleUpdateProfileImage}
-          color="#7E57C2"
-        />
+        <Button title="Cambiar Imagen de Perfil" onPress={handleUpdateProfileImage} color="#7E57C2" />
 
         {/* Correo electrónico */}
         <Text style={styles.label}>Correo electrónico:</Text>
         <Text style={styles.emailText}>{email}</Text>
+
+        <Button title="Editar Correo Electrónico" onPress={() => setModalVisible(true)} color="#7E57C2" />
 
         {/* Nueva contraseña */}
         <TextInput
@@ -141,14 +141,30 @@ const ProfileScreen = () => {
           secureTextEntry
           placeholderTextColor="#B39DDB"
         />
-        <Button
-          title="Actualizar Contraseña"
-          onPress={handleUpdatePassword}
-          color="#7E57C2"
-        />
+        <Button title="Actualizar Contraseña" onPress={handleUpdatePassword} color="#7E57C2" />
 
         {loading && <ActivityIndicator size="large" color="#7E57C2" />}
       </View>
+
+      {/* MODAL PARA EDITAR CORREO ELECTRÓNICO */}
+      <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Editar Correo Electrónico</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nuevo Correo Electrónico"
+              value={newEmail}
+              onChangeText={setNewEmail}
+              placeholderTextColor="#B39DDB"
+            />
+            <Button title="Actualizar" onPress={handleUpdateEmail} color="#7E57C2" />
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.cancelText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -199,6 +215,30 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingLeft: 8,
     color: "#FFF",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#2E2739",
+    padding: 20,
+    borderRadius: 15,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginBottom: 15,
+  },
+  cancelText: {
+    marginTop: 10,
+    color: "#B39DDB",
+    fontSize: 16,
   },
 });
 
