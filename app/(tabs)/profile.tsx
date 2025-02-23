@@ -1,48 +1,61 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Image, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Image,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { auth } from "../dataSource";
 import { updatePassword, updateEmail, updateProfile } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
+import EmailModal from "../../components/EmailModal";
+import PasswordModal from "../../components/NewPasswordModal";
 
-//falta incorporar el componente modal urivic
 const ProfileScreen = () => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(auth.currentUser);
+  const [emailModalVisible, setEmailModalVisible] = useState(false);
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log("Usuario autenticado:", user.email); // Depuración
         setUser(user);
         setEmail(user.email || "");
         setProfileImage(user.photoURL || "https://via.placeholder.com/150");
       } else {
-        console.log("No hay usuario autenticado."); // Depuración
-        router.push("/login"); // Redirige al usuario a la pantalla de inicio de sesión
+        router.push("/login");
       }
     });
 
-    return () => unsubscribe(); // Limpia el listener al desmontar el componente
+    return () => unsubscribe();
   }, [router]);
 
   if (!user) {
-    return <Text>Inicie sesión para acceder a su perfil...</Text>; // Muestra un mensaje de carga mientras se verifica la autenticación
+    return <Text>Inicie sesión para acceder a su perfil...</Text>;
   }
 
-  const handleUpdateEmail = async () => {
-    if (!email) {
+  const handleUpdateEmail = async (newEmail: string) => {
+    if (!newEmail) {
       Alert.alert("Error", "El correo electrónico no puede estar vacío.");
       return;
     }
 
     try {
       setLoading(true);
-      await updateEmail(user, email);
+      await updateEmail(user, newEmail);
+      setEmail(newEmail);
+      setEmailModalVisible(false);
       Alert.alert("Éxito", "Correo electrónico actualizado correctamente.");
     } catch (error) {
       if (error instanceof Error) {
@@ -55,7 +68,7 @@ const ProfileScreen = () => {
     }
   };
 
-  const handleUpdatePassword = async () => {
+  const handleUpdatePassword = async (newPassword: string) => {
     if (!newPassword) {
       Alert.alert("Error", "La nueva contraseña no puede estar vacía.");
       return;
@@ -64,8 +77,9 @@ const ProfileScreen = () => {
     try {
       setLoading(true);
       await updatePassword(user, newPassword);
-      Alert.alert("Éxito", "Contraseña actualizada correctamente.");
       setNewPassword("");
+      setPasswordModalVisible(false);
+      Alert.alert("Éxito", "Contraseña actualizada correctamente.");
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert("Error", error.message);
@@ -115,38 +129,39 @@ const ProfileScreen = () => {
         <Text style={styles.title}>Perfil de Usuario</Text>
 
         {/* Imagen de perfil */}
-        <Image
-          source={{ uri: profileImage || "https://via.placeholder.com/150" }}
-          style={styles.profileImage}
-        />
+        <Image source={{ uri: profileImage || "https://via.placeholder.com/150" }} style={styles.profileImage} />
 
-        <Button
-          title="Cambiar Imagen de Perfil"
-          onPress={handleUpdateProfileImage}
-          color="#7E57C2"
-        />
+        <Button title="Cambiar Imagen de Perfil" onPress={handleUpdateProfileImage} color="#7E57C2" />
 
         {/* Correo electrónico */}
         <Text style={styles.label}>Correo electrónico:</Text>
         <Text style={styles.emailText}>{email}</Text>
 
-        {/* Nueva contraseña */}
-        <TextInput
-          style={styles.input}
-          placeholder="Nueva Contraseña"
-          value={newPassword}
-          onChangeText={setNewPassword}
-          secureTextEntry
-          placeholderTextColor="#B39DDB"
-        />
-        <Button
-          title="Actualizar Contraseña"
-          onPress={handleUpdatePassword}
-          color="#7E57C2"
-        />
+        {/* Botones para editar correo y contraseña */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.button} onPress={() => setEmailModalVisible(true)}>
+            <Text style={styles.buttonText}>Editar Correo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => setPasswordModalVisible(true)}>
+            <Text style={styles.buttonText}>Cambiar Contraseña</Text>
+          </TouchableOpacity>
+        </View>
 
         {loading && <ActivityIndicator size="large" color="#7E57C2" />}
       </View>
+
+      {/* Modales */}
+      <EmailModal
+        visible={emailModalVisible}
+        onClose={() => setEmailModalVisible(false)}
+        onUpdateEmail={handleUpdateEmail}
+        currentEmail={email}
+      />
+      <PasswordModal
+        visible={passwordModalVisible}
+        onClose={() => setPasswordModalVisible(false)}
+        onUpdatePassword={handleUpdatePassword}
+      />
     </View>
   );
 };
@@ -190,13 +205,23 @@ const styles = StyleSheet.create({
     color: "#B39DDB",
     marginBottom: 20,
   },
-  input: {
-    height: 40,
-    borderBottomColor: "#7E57C2",
-    borderBottomWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 8,
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  button: {
+    backgroundColor: "#7E57C2",
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    width: "48%", // Para que ambos botones quepan en una fila
+  },
+  buttonText: {
     color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 
