@@ -13,7 +13,7 @@ const LoginScreen = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Bienvenido", "Has iniciado sesión.");
-      router.push("/bienvenida");
+      router.push("/dashboard");
     } catch (error) {
       const errorMessage = (error as Error).message;
       Alert.alert("Error", errorMessage);
