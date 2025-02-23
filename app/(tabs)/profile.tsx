@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { auth } from "../dataSource";
+import { auth } from "../../lib/FireBase";
 import { updatePassword, updateEmail, updateProfile } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 import EmailModal from "../../components/EmailModal";
