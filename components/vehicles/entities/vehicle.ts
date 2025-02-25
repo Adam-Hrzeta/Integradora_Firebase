@@ -4,5 +4,5 @@ export type Vehicle = {
     model: string;
     licence: string;
     last_login: string; //referencia a logs
-    owner_id: string; //
+    owner_id: string; //referencia a logs
 }
