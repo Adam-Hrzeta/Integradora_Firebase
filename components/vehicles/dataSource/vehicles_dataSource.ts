@@ -23,10 +23,9 @@ export class VehiclesDataSource{
             const item : Vehicle = {
                 id: doc.id,
                 brand: docData.brand,
-                licence: docData.license,
+                licence: docData.licence,
                 model: docData.model,
-                owner_id: docData.owner_id,
-                last_login: docData.last_login,
+                year: docData.year,
             }
 
             items.push(item);
