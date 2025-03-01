@@ -16,6 +16,8 @@ import { updateEmail, updateProfile, updatePassword } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 import EmailModal from "../../components/EmailModal";
 import PasswordModal from "../../components/NewPasswordModal";
+import NameModal from "../../components/nameModal"; // Importar el nuevo modal
+
 const ProfileScreen = () => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -24,6 +26,7 @@ const ProfileScreen = () => {
   const [user, setUser] = useState(auth.currentUser);
   const [emailModalVisible, setEmailModalVisible] = useState(false);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [nameModalVisible, setNameModalVisible] = useState(false); // Estado para el modal de nombre
   const router = useRouter();
 
   useEffect(() => {
@@ -122,6 +125,22 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleUpdateName = async (newName: string) => {
+    try {
+      setLoading(true);
+      await updateProfile(user, { displayName: newName });
+      Alert.alert("Éxito", "Nombre actualizado correctamente.");
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message);
+      } else {
+        Alert.alert("Error", "Ocurrió un error inesperado.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.formContainer}>
@@ -131,6 +150,11 @@ const ProfileScreen = () => {
         <Image source={{ uri: profileImage || "https://via.placeholder.com/150" }} style={styles.profileImage} />
 
         <Button title="Cambiar Imagen de Perfil" onPress={handleUpdateProfileImage} color="#7E57C2" />
+
+        {/* Nombre del usuario */}
+        <Text style={styles.label}>Nombre:</Text>
+        <Text style={styles.emailText}>{user.displayName || "Sin nombre"}</Text>
+        <Button title="Cambiar Nombre" onPress={() => setNameModalVisible(true)} color="#7E57C2" />
 
         {/* Correo electrónico */}
         <Text style={styles.label}>Correo electrónico:</Text>
@@ -160,6 +184,12 @@ const ProfileScreen = () => {
         visible={passwordModalVisible}
         onClose={() => setPasswordModalVisible(false)}
         onUpdatePassword={handleUpdatePassword}
+      />
+      <NameModal
+        visible={nameModalVisible}
+        onClose={() => setNameModalVisible(false)}
+        onUpdateName={handleUpdateName}
+        currentName={user.displayName || ""}
       />
     </View>
   );

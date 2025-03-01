@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { View, TextInput, Button, Text, Alert, StyleSheet, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from "../../lib/Firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 
 const LoginScreen = () => {
