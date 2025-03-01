@@ -1,18 +1,29 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, Text, Alert, StyleSheet, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
 import { useRouter } from "expo-router";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { auth } from "../../lib/Firebase";
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState(""); // Nuevo estado para el displayName
   const router = useRouter();
 
   const handleRegister = async () => {
     try {
+      // Registrar al usuario con correo y contraseña
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await sendEmailVerification(userCredential.user); // Enviar correo de verificación
+
+      // Actualizar el perfil del usuario con el displayName
+      await updateProfile(userCredential.user, {
+        displayName: displayName, // Aquí se agrega el displayName
+      });
+
+      // Enviar correo de verificación
+      await sendEmailVerification(userCredential.user);
+
+      // Mostrar alerta y redirigir al login
       Alert.alert("Cuenta creada", "Se ha enviado un correo de verificación. Revisa tu bandeja.");
       router.push("/login");
     } catch (error) {
@@ -30,6 +41,15 @@ const RegisterScreen = () => {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>Registro</Text>
+          {/* Nuevo campo para el displayName */}
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre completo"
+            value={displayName}
+            onChangeText={setDisplayName}
+            autoCapitalize="words"
+            placeholderTextColor="#B39DDB"
+          />
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, Text, Alert, StyleSheet, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "../../lib/Firebase";
 
 const LoginScreen = () => {
@@ -11,9 +11,23 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert("Bienvenido", "Has iniciado sesión.");
-      router.push("/dashboard");
+      // Iniciar sesión con correo y contraseña
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Verificar si el correo electrónico está confirmado
+      if (user.emailVerified) {
+        // Si el correo está verificado, redirigir al usuario a la pantalla principal
+        Alert.alert("Bienvenido", "Has iniciado sesión.");
+        router.push("/dashboard");
+      } else {
+        // Si el correo no está verificado, mostrar un mensaje y cerrar sesión
+        Alert.alert(
+          "Correo no verificado",
+          "Por favor, verifica tu correo electrónico antes de iniciar sesión."
+        );
+        await signOut(auth); // Cerrar sesión para evitar acceso no autorizado
+      }
     } catch (error) {
       const errorMessage = (error as Error).message;
       Alert.alert("Error", errorMessage);
