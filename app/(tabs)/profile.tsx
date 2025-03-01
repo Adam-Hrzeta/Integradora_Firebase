@@ -11,12 +11,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { auth } from "../../lib/Firebase";
-import { updatePassword, updateEmail, updateProfile } from "firebase/auth";
+import { auth } from "../../lib/firebase";
+import { updateEmail, updateProfile, updatePassword } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 import EmailModal from "../../components/EmailModal";
 import PasswordModal from "../../components/NewPasswordModal";
-
 const ProfileScreen = () => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");

@@ -1,4 +1,4 @@
-import { db } from "@/lib/Firebase";
+import { db } from "@/lib/firebase";
 import { Vehicle } from "../entities/vehicle";
 import { collection, getDocs, query } from "firebase/firestore";
 
