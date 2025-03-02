@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Button, StyleSheet, ImageBackground } from "react-native";
 import { useRouter } from "expo-router";
 
-const WelcomeScreen = () => {
+const Index = () => {
   const router = useRouter();
 
   return (
@@ -66,4 +66,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WelcomeScreen;
+export default Index;
