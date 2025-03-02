@@ -21,6 +21,7 @@ export class ParkingDataSource{
 
             const item : Parking = {
                 id: doc.id,
+                label: docData.label,
                 status: docData.status,
             }
 

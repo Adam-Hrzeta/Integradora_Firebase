@@ -3,7 +3,7 @@ import { Parking } from "../entities/parking";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ParkingDataSource } from "../dataSource/parkings_dataSource";
 import { ActivityIndicator, FlatList, View, StyleSheet, Text } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons"; // Importar íconos
+import { AntDesign, Entypo, FontAwesome5 } from "@expo/vector-icons";
 
 const ParkingScreen = () => {
     const [parkings, setParkings] = useState<Parking[]>([]);
@@ -49,14 +49,12 @@ const ParkingScreen = () => {
     // Función para obtener el ícono según el estado
     const getIconByStatus = (status: string) => {
         switch (status) {
-            case "libre":
-                return <Icon name="check-circle" size={30} color="green" />;
             case "ocupado":
-                return <Icon name="cancel" size={30} color="red" />;
+                return <AntDesign name="closecircle" size={24} color="black" />;
             case "servicio":
-                return <Icon name="build" size={30} color="orange" />;
+                return <Entypo name="tools" size={24} color="black" />;
             default:
-                return <Icon name="help" size={30} color="gray" />;
+                return <FontAwesome5 name="check-circle" size={24} color="black" />;
         }
     };
 
@@ -70,7 +68,7 @@ const ParkingScreen = () => {
                 renderItem={({ item }) => (
                     <View style={styles.parkingItem}>
                         {getIconByStatus(item.status)}
-                        <Text style={styles.parkingText}>Cajón {item.id}</Text>
+                        <Text style={styles.parkingText}>Cajón {item.label}</Text>
                     </View>
                 )}
                 contentContainerStyle={styles.listContainer}
