@@ -3,10 +3,9 @@ import { Vehicle } from "../entities/vehicle";
 import { collection, getDocs, query } from "firebase/firestore";
 
 export class VehiclesDataSource{
-    constructor(){
-    }
+    constructor(){}
 
-    async getUserVehicle(userId: string) : Promise<Vehicle[]>{
+    async getUserVehicle() : Promise<Vehicle[]>{
         //en items vamos a almacenar los documentos traidos de firabase
         const items: Vehicle[] = [];
 
