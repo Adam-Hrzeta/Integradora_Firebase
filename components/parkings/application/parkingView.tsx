@@ -14,7 +14,7 @@ const ParkingScreen = () => {
     const [error, setError] = useState<string | null>(null);
     const [showQRModal, setShowQRModal] = useState(false); // Para controlar la visibilidad del modal del QR
     const [selectedParking, setSelectedParking] = useState<Parking | null>(null); // Cajón seleccionado para el QR
-    const [reservedParkingId, setReservedParkingId] = useState<string | null>(null); // ID del cajón reservado
+    const [isButtonDisabled, setIsButtonDisabled] = useState(false); // Para deshabilitar el botón
 
     useEffect(() => {
         const auth = getAuth();
@@ -33,6 +33,10 @@ const ParkingScreen = () => {
                             ...doc.data(),
                         })) as Parking[];
                         setParkings(updatedParkings);
+
+                        // Verificar si hay algún estacionamiento en estado "reservado"
+                        const isReserved = updatedParkings.some((parking) => parking.status === "reservado");
+                        setIsButtonDisabled(isReserved); // Deshabilitar el botón si hay un estacionamiento reservado
                     });
 
                     return () => unsubscribeSnapshot(); // Limpiar la suscripción al desmontar
@@ -61,7 +65,6 @@ const ParkingScreen = () => {
             // Marcar el estacionamiento como "reservado"
             const parkingRef = doc(db, "parkings", firstFreeParking.id);
             await updateDoc(parkingRef, { status: "reservado" });
-            setReservedParkingId(firstFreeParking.id); // Guardar el ID del cajón reservado
         }
     };
 
@@ -108,7 +111,7 @@ const ParkingScreen = () => {
                     <View style={styles.parkingItem}>
                         {getIconByStatus(item.status)}
                         <Text style={styles.parkingText}>Cajón {item.label}</Text>
-                        {item.status === "reservado" && !reservedParkingId && ( // Mostrar leyenda solo a otros usuarios
+                        {item.status === "reservado" && ( // Mostrar leyenda si el cajón está reservado
                             <Text style={styles.waitingText}>Espere mientras el usuario anterior se estaciona...</Text>
                         )}
                     </View>
@@ -117,7 +120,11 @@ const ParkingScreen = () => {
             />
 
             {/* Botón para generar el QR */}
-            <TouchableOpacity style={styles.parkingButton} onPress={handleParkingClick}>
+            <TouchableOpacity
+                style={[styles.parkingButton, isButtonDisabled && styles.disabledButton]} // Estilo condicional para el botón
+                onPress={handleParkingClick}
+                disabled={isButtonDisabled} // Deshabilitar el botón si isButtonDisabled es true
+            >
                 <Text style={styles.buttonText}>Quiero estacionarme</Text>
             </TouchableOpacity>
 
@@ -191,6 +198,9 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 10,
         alignItems: "center",
+    },
+    disabledButton: {
+        backgroundColor: "#ccc", // Color gris para el botón deshabilitado
     },
     buttonText: {
         color: "white",
