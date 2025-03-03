@@ -12,9 +12,9 @@ const ParkingScreen = () => {
     const [parkings, setParkings] = useState<Parking[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [showQRModal, setShowQRModal] = useState(false); // Para controlar la visibilidad del modal del QR
-    const [selectedParking, setSelectedParking] = useState<Parking | null>(null); // Cajón seleccionado para el QR
-    const [isButtonDisabled, setIsButtonDisabled] = useState(false); // Para deshabilitar el botón
+    const [showQRModal, setShowQRModal] = useState(false);
+    const [isButtonDisabled, setIsButtonDisabled] = useState(false); 
+    const [isParkingInProgress, setIsParkingInProgress] = useState(false); 
 
     useEffect(() => {
         const auth = getAuth();
@@ -34,13 +34,16 @@ const ParkingScreen = () => {
                                 id: doc.id, // Usamos el ID del documento de Firestore
                                 ...docData, // Spread de los demás campos de docData
                             };
-                        }).filter((parking) => parking.status !== "ocupado"); // Filtrar estacionamientos ocupados
+                        });
 
                         setParkings(updatedParkings);
 
-                        // Verificar si hay algún estacionamiento en estado "reservado"
-                        const isReserved = updatedParkings.some((parking) => parking.status === "reservado");
-                        setIsButtonDisabled(isReserved); // Deshabilitar el botón si hay un estacionamiento reservado
+                        // Verificar si hay algún estacionamiento en estado "ocupado"
+                        const isOccupied = updatedParkings.some((parking) => parking.status === "ocupado");
+                        if (isOccupied) {
+                            setIsParkingInProgress(false); // Ocultar la leyenda y habilitar el botón
+                            setIsButtonDisabled(false);
+                        }
                     });
 
                     return () => unsubscribeSnapshot(); // Limpiar la suscripción al desmontar
@@ -61,23 +64,14 @@ const ParkingScreen = () => {
 
     // Función para manejar el clic en "Quiero estacionarme"
     const handleParkingClick = async () => {
-        if (parkings.length > 0) {
-            const firstFreeParking = parkings.find((parking) => parking.status === "libre"); // Seleccionar el primer cajón libre
-            if (firstFreeParking) {
-                setSelectedParking(firstFreeParking);
-                setShowQRModal(true);
-
-                // Marcar el estacionamiento como "reservado"
-                const parkingRef = doc(db, "parkings", firstFreeParking.id);
-                await updateDoc(parkingRef, { status: "reservado" });
-            }
-        }
+        setShowQRModal(true); // Mostrar el modal del QR
+        setIsParkingInProgress(true); // Mostrar la leyenda a los demás usuarios
+        setIsButtonDisabled(true); // Deshabilitar el botón
     };
 
     // Función para cerrar el modal del QR
     const closeQRModal = () => {
         setShowQRModal(false);
-        setSelectedParking(null);
     };
 
     if (loading) {
@@ -97,8 +91,6 @@ const ParkingScreen = () => {
         switch (status) {
             case "ocupado":
                 return <AntDesign name="closecircle" size={24} color="red" />;
-            case "reservado":
-                return <Entypo name="clock" size={24} color="orange" />; // Ícono de reloj para "reservado"
             case "servicio":
                 return <Entypo name="tools" size={24} color="orange" />;
             default:
@@ -110,15 +102,15 @@ const ParkingScreen = () => {
         <View style={styles.container}>
             <Text style={styles.title}>Estacionamientos</Text>
             <FlatList
-                data={parkings}
+                data={parkings.filter((parking) => parking.status !== "ocupado")} // Filtrar estacionamientos ocupados
                 keyExtractor={(item) => item.id}
                 numColumns={3} // Mostrar en cuadrícula de 3 columnas
                 renderItem={({ item }) => (
                     <View style={styles.parkingItem}>
                         {getIconByStatus(item.status)}
                         <Text style={styles.parkingText}>Cajón {item.label}</Text>
-                        {item.status === "reservado" && ( // Mostrar leyenda si el cajón está reservado
-                            <Text style={styles.waitingText}>Espere mientras el usuario anterior se estaciona...</Text>
+                        {isParkingInProgress && ( // Mostrar leyenda si hay un estacionamiento en progreso
+                            <Text style={styles.waitingText}>Espere hasta que el automóvil anterior se estacione...</Text>
                         )}
                     </View>
                 )}
@@ -139,14 +131,12 @@ const ParkingScreen = () => {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>QR para estacionarse</Text>
-                        {selectedParking && (
-                            <QRCode
-                                value={`parking:${selectedParking.id}`} // Generar QR con el ID del cajón
-                                size={200}
-                                color="black"
-                                backgroundColor="white"
-                            />
-                        )}
+                        <QRCode
+                            value="parking:reservado" // Generar un QR genérico
+                            size={200}
+                            color="black"
+                            backgroundColor="white"
+                        />
                         <TouchableOpacity style={styles.closeButton} onPress={closeQRModal}>
                             <Text style={styles.closeButtonText}>Cerrar</Text>
                         </TouchableOpacity>
@@ -157,7 +147,6 @@ const ParkingScreen = () => {
     );
 };
 
-// Estilos
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -174,8 +163,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     parkingItem: {
-        width: 100, // Ancho de cada cajón
-        height: 120, // Alto de cada cajón (aumentado para incluir la leyenda)
+        width: 100, 
+        height: 120, 
         justifyContent: "center",
         alignItems: "center",
         margin: 10,
@@ -195,7 +184,7 @@ const styles = StyleSheet.create({
     waitingText: {
         marginTop: 5,
         fontSize: 12,
-        color: "#ff5722", // Color naranja para la leyenda
+        color: "#ff5722", 
         textAlign: "center",
     },
     parkingButton: {
@@ -206,7 +195,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     disabledButton: {
-        backgroundColor: "#ccc", // Color gris para el botón deshabilitado
+        backgroundColor: "#ccc", 
     },
     buttonText: {
         color: "white",

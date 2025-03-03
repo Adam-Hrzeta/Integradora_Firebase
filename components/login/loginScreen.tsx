@@ -19,7 +19,7 @@ const LoginScreen = () => {
       if (user.emailVerified) {
         // Si el correo está verificado, redirigir al usuario a la pantalla principal
         Alert.alert("Bienvenido", "Has iniciado sesión.");
-        router.push("/dashboard");
+        router.push("/parkings");
       } else {
         // Si el correo no está verificado, mostrar un mensaje y cerrar sesión
         Alert.alert(
