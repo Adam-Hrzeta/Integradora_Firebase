@@ -5,48 +5,36 @@ import { ParkingDataSource } from "../dataSource/parkings_dataSource";
 import { ActivityIndicator, FlatList, View, StyleSheet, Text, TouchableOpacity, Modal } from "react-native";
 import { AntDesign, Entypo, FontAwesome5 } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
-import { db } from "@/lib/firebase";
-import { collection, doc, onSnapshot, updateDoc } from "firebase/firestore";
 
 const ParkingScreen = () => {
     const [parkings, setParkings] = useState<Parking[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showQRModal, setShowQRModal] = useState(false);
-    const [isButtonDisabled, setIsButtonDisabled] = useState(false); 
-    const [isParkingInProgress, setIsParkingInProgress] = useState(false); 
+    const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+    const [isParkingInProgress, setIsParkingInProgress] = useState(false);
 
     useEffect(() => {
         const auth = getAuth();
+        const dataSource = new ParkingDataSource();
 
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
-                    const dataSource = new ParkingDataSource();
-                    const parkingsData = await dataSource.getFreeParking(); // Solo mostramos los estacionamientos libres
+                    const parkingsData = await dataSource.getFreeParking();
                     setParkings(parkingsData);
 
-                    // Escuchar cambios en tiempo real para los estacionamientos
-                    const unsubscribeSnapshot = onSnapshot(collection(db, "parkings"), (snapshot) => {
-                        const updatedParkings = snapshot.docs.map((doc) => {
-                            const docData = doc.data() as Parking; // Cast explícito al tipo Parking
-                            return {
-                                id: doc.id, // Usamos el ID del documento de Firestore
-                                ...docData, // Spread de los demás campos de docData
-                            };
-                        });
-
+                    const unsubscribeSnapshot = dataSource.subscribeToParkingChanges((updatedParkings) => {
                         setParkings(updatedParkings);
 
-                        // Verificar si hay algún estacionamiento en estado "ocupado"
                         const isOccupied = updatedParkings.some((parking) => parking.status === "ocupado");
                         if (isOccupied) {
-                            setIsParkingInProgress(false); // Ocultar la leyenda y habilitar el botón
+                            setIsParkingInProgress(false);
                             setIsButtonDisabled(false);
                         }
                     });
 
-                    return () => unsubscribeSnapshot(); // Limpiar la suscripción al desmontar
+                    return () => unsubscribeSnapshot();
                 } catch (error) {
                     console.error("Error fetching parkings:", error);
                     setError("Error al cargar los estacionamientos");
@@ -59,17 +47,15 @@ const ParkingScreen = () => {
             }
         });
 
-        return () => unsubscribeAuth(); // Limpiar la suscripción al desmontar
+        return () => unsubscribeAuth();
     }, []);
 
-    // Función para manejar el clic en "Quiero estacionarme"
     const handleParkingClick = async () => {
-        setShowQRModal(true); // Mostrar el modal del QR
-        setIsParkingInProgress(true); // Mostrar la leyenda a los demás usuarios
-        setIsButtonDisabled(true); // Deshabilitar el botón
+        setShowQRModal(true);
+        setIsParkingInProgress(true);
+        setIsButtonDisabled(true);
     };
 
-    // Función para cerrar el modal del QR
     const closeQRModal = () => {
         setShowQRModal(false);
     };
@@ -86,7 +72,6 @@ const ParkingScreen = () => {
         );
     }
 
-    // Función para obtener el ícono según el estado
     const getIconByStatus = (status: string) => {
         switch (status) {
             case "ocupado":
@@ -102,14 +87,14 @@ const ParkingScreen = () => {
         <View style={styles.container}>
             <Text style={styles.title}>Estacionamientos</Text>
             <FlatList
-                data={parkings.filter((parking) => parking.status !== "ocupado")} // Filtrar estacionamientos ocupados
+                data={parkings.filter((parking) => parking.status !== "ocupado")}
                 keyExtractor={(item) => item.id}
-                numColumns={3} // Mostrar en cuadrícula de 3 columnas
+                numColumns={3}
                 renderItem={({ item }) => (
                     <View style={styles.parkingItem}>
                         {getIconByStatus(item.status)}
                         <Text style={styles.parkingText}>Cajón {item.label}</Text>
-                        {isParkingInProgress && ( // Mostrar leyenda si hay un estacionamiento en progreso
+                        {isParkingInProgress && (
                             <Text style={styles.waitingText}>Espere hasta que el automóvil anterior se estacione...</Text>
                         )}
                     </View>
@@ -117,22 +102,20 @@ const ParkingScreen = () => {
                 contentContainerStyle={styles.listContainer}
             />
 
-            {/* Botón para generar el QR */}
             <TouchableOpacity
-                style={[styles.parkingButton, isButtonDisabled && styles.disabledButton]} // Estilo condicional para el botón
+                style={[styles.parkingButton, isButtonDisabled && styles.disabledButton]}
                 onPress={handleParkingClick}
-                disabled={isButtonDisabled} // Deshabilitar el botón si isButtonDisabled es true
+                disabled={isButtonDisabled}
             >
                 <Text style={styles.buttonText}>Quiero estacionarme</Text>
             </TouchableOpacity>
 
-            {/* Modal para mostrar el QR */}
             <Modal visible={showQRModal} transparent={true} animationType="slide">
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>QR para estacionarse</Text>
                         <QRCode
-                            value="parking:reservado" // Generar un QR genérico
+                            value="parking:reservado"
                             size={200}
                             color="black"
                             backgroundColor="white"
@@ -163,8 +146,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     parkingItem: {
-        width: 100, 
-        height: 120, 
+        width: 100,
+        height: 120,
         justifyContent: "center",
         alignItems: "center",
         margin: 10,
@@ -184,7 +167,7 @@ const styles = StyleSheet.create({
     waitingText: {
         marginTop: 5,
         fontSize: 12,
-        color: "#ff5722", 
+        color: "#ff5722",
         textAlign: "center",
     },
     parkingButton: {
@@ -195,7 +178,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     disabledButton: {
-        backgroundColor: "#ccc", 
+        backgroundColor: "#ccc",
     },
     buttonText: {
         color: "white",
