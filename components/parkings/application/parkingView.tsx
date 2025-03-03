@@ -28,10 +28,14 @@ const ParkingScreen = () => {
 
                     // Escuchar cambios en tiempo real para los estacionamientos
                     const unsubscribeSnapshot = onSnapshot(collection(db, "parkings"), (snapshot) => {
-                        const updatedParkings = snapshot.docs.map((doc) => ({
-                            id: doc.id,
-                            ...doc.data(),
-                        })) as Parking[];
+                        const updatedParkings = snapshot.docs.map((doc) => {
+                            const docData = doc.data() as Parking; // Cast explícito al tipo Parking
+                            return {
+                                id: doc.id, // Usamos el ID del documento de Firestore
+                                ...docData, // Spread de los demás campos de docData
+                            };
+                        }).filter((parking) => parking.status !== "ocupado"); // Filtrar estacionamientos ocupados
+
                         setParkings(updatedParkings);
 
                         // Verificar si hay algún estacionamiento en estado "reservado"
@@ -58,13 +62,15 @@ const ParkingScreen = () => {
     // Función para manejar el clic en "Quiero estacionarme"
     const handleParkingClick = async () => {
         if (parkings.length > 0) {
-            const firstFreeParking = parkings[0]; // Seleccionar el primer cajón libre
-            setSelectedParking(firstFreeParking);
-            setShowQRModal(true);
+            const firstFreeParking = parkings.find((parking) => parking.status === "libre"); // Seleccionar el primer cajón libre
+            if (firstFreeParking) {
+                setSelectedParking(firstFreeParking);
+                setShowQRModal(true);
 
-            // Marcar el estacionamiento como "reservado"
-            const parkingRef = doc(db, "parkings", firstFreeParking.id);
-            await updateDoc(parkingRef, { status: "reservado" });
+                // Marcar el estacionamiento como "reservado"
+                const parkingRef = doc(db, "parkings", firstFreeParking.id);
+                await updateDoc(parkingRef, { status: "reservado" });
+            }
         }
     };
 
