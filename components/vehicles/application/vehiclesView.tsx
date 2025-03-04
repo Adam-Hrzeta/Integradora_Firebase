@@ -37,7 +37,7 @@ const VehiclesScreen = () => {
 
     return (
         <View style={{ flex: 1, padding: 20 }}>
-            <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Lista de Vehículos</Text>
+            <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Lista de tus Vehículos registrados</Text>
             <FlatList
                 data={vehicles}
                 keyExtractor={(item) => item.id}
