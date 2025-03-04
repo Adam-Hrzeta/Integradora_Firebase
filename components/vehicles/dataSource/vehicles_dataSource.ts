@@ -5,7 +5,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 export class VehiclesDataSource {
     constructor() {}
 
-    async getUserVehicle(uid: string, vehicle: Vehicle): Promise<Vehicle[]> {
+    async getUserVehicle(uid: string): Promise<Vehicle[]> {
         // En items vamos a almacenar los documentos traídos de Firebase
         const items: Vehicle[] = [];
 
