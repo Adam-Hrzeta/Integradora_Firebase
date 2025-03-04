@@ -3,13 +3,13 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   Image,
   StyleSheet,
   Alert,
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
+  ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { auth } from "../../lib/firebase";
@@ -121,58 +121,69 @@ const ProfileScreen = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>{user.displayName || "Sin nombre"}</Text>
+    <ImageBackground
+      source={{ uri: "https://static.vecteezy.com/system/resources/previews/025/515/340/original/parking-top-view-garage-floor-with-cars-from-above-city-parking-lot-with-free-space-cartoon-street-carpark-with-various-vehicles-illustration-vector.jpg" }}
+      style={styles.background}
+      blurRadius={10}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <View style={styles.formContainer}>
+            <Text style={styles.title}>{user.displayName || "Sin nombre"}</Text>
 
-          {/* Imagen de perfil */}
-          <View style={styles.imageContainer}>
-            <Image
-              source={profileImage ? { uri: profileImage } : require("../../assets/images/defaultProfile.png")}
-              style={styles.profileImage}
-            />
-            <TouchableOpacity style={styles.editIcon} onPress={handleUpdateProfileImage}>
-              <Ionicons name="camera" size={24} color="#FFF" />
-            </TouchableOpacity>
-          </View>
+            {/* Imagen de perfil */}
+            <View style={styles.imageContainer}>
+              <Image
+                source={profileImage ? { uri: profileImage } : require("../../assets/images/defaultProfile.png")}
+                style={styles.profileImage}
+              />
+              <TouchableOpacity style={styles.editIcon} onPress={handleUpdateProfileImage}>
+                <Ionicons name="camera" size={24} color="#FFF" />
+              </TouchableOpacity>
+            </View>
 
-          {/* Nombre del usuario */}
+            {/* Nombre del usuario */}
             <TouchableOpacity style={styles.editName} onPress={() => setNameModalVisible(true)}>
-              <MaterialIcons name="drive-file-rename-outline" size={24} color="white" />
+              <MaterialIcons name="drive-file-rename-outline" size={24} color="white" />
             </TouchableOpacity>
 
-          {/* Correo electrónico */}
-          <Text style={styles.label}>Correo electrónico:</Text>
-          <Text style={styles.emailText}>{email}</Text>
+            {/* Correo electrónico */}
+            <Text style={styles.label}>Correo electrónico:</Text>
+            <Text style={styles.emailText}>{email}</Text>
 
-          {/* Botones para editar correo y contraseña */}
-          <View>
-            <TouchableOpacity style={styles.button} onPress={() => setPasswordModalVisible(true)}>
-              <Text style={styles.buttonText}>Cambiar Contraseña</Text>
-            </TouchableOpacity>
+            {/* Botones para editar correo y contraseña */}
+            <View>
+              <TouchableOpacity style={styles.button} onPress={() => setPasswordModalVisible(true)}>
+                <Text style={styles.buttonText}>Cambiar Contraseña</Text>
+              </TouchableOpacity>
+            </View>
+
+            {loading && <ActivityIndicator size="large" color="#7E57C2" />}
           </View>
 
-          {loading && <ActivityIndicator size="large" color="#7E57C2" />}
+          <PasswordModal
+            visible={passwordModalVisible}
+            onClose={() => setPasswordModalVisible(false)}
+            onUpdatePassword={handleUpdatePassword}
+          />
+          <NameModal
+            visible={nameModalVisible}
+            onClose={() => setNameModalVisible(false)}
+            onUpdateName={handleUpdateName}
+            currentName={user.displayName || ""}
+          />
         </View>
-
-        <PasswordModal
-          visible={passwordModalVisible}
-          onClose={() => setPasswordModalVisible(false)}
-          onUpdatePassword={handleUpdatePassword}
-        />
-        <NameModal
-          visible={nameModalVisible}
-          onClose={() => setNameModalVisible(false)}
-          onUpdateName={handleUpdateName}
-          currentName={user.displayName || ""}
-        />
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "center",
+  },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
@@ -181,22 +192,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1E1E1E",
     padding: 20,
   },
   formContainer: {
-    width: "100%",
-    maxWidth: 400,
-    backgroundColor: "#2E2739",
+    width: "80%",
+    backgroundColor: "rgba(46, 39, 57, 0.8)",
     padding: 25,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
   },
   title: {
     fontSize: 24,
@@ -231,20 +235,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 4,
   },
-  editButton: {
-    backgroundColor: "#7E57C2",
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    alignSelf: "center",
-    marginBottom: 20,
-  },
-  editButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
   label: {
     fontSize: 16,
     color: "#FFF",
@@ -257,19 +247,15 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#7E57C2",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    borderRadius: 25,
+    paddingVertical: 12,
     alignItems: "center",
-    width: "100%",
-    justifyContent: "center",
-    marginTop: 45,
+    marginBottom: 15,
   },
   buttonText: {
     color: "#FFF",
     fontSize: 16,
     fontWeight: "bold",
-    textAlign: "center",
   },
 });
 

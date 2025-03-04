@@ -17,26 +17,15 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          display: 'none', // Oculta la barra de pestañas en todas las pantallas
+        },
       }}>
       <Tabs.Screen
         name="register"
         options={{
           title: 'Registro',
           tabBarIcon: ({ color }) => <AntDesign name="addusergroup" size={24} color="black" />,
-        }}
-      />
-      <Tabs.Screen
-        name="login"
-        options={{
-          title: 'Inicio de sesión',
-          tabBarIcon: ({ color }) => <SimpleLineIcons name="login" size={24} color="black" />,
         }}
       />
       <Tabs.Screen

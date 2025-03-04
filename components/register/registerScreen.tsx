@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { 
-  View, TextInput, Button, Text, Alert, 
-  StyleSheet, KeyboardAvoidingView, Platform, 
-  ImageBackground, TouchableOpacity 
+import {
+  View,
+  TextInput,
+  Text,
+  Alert,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ImageBackground,
+  TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
@@ -27,7 +33,7 @@ const RegisterScreen = () => {
       Alert.alert("Cuenta creada", "Se ha enviado un correo de verificación. Ahora registra tu vehículo.");
 
       // Redirigir al formulario de registro de vehículo
-      router.push("/register-vehicle");
+      router.push("/registerVehicle");
     } catch (error) {
       Alert.alert("Error", (error as Error).message);
     }
@@ -42,7 +48,7 @@ const RegisterScreen = () => {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>Registro</Text>
-          
+
           {/* Campo Nombre Completo */}
           <TextInput
             style={[styles.input, focusedInput === "displayName" && styles.inputFocused]}
@@ -50,7 +56,7 @@ const RegisterScreen = () => {
             value={displayName}
             onChangeText={setDisplayName}
             autoCapitalize="words"
-            placeholderTextColor="#7E57C2"
+            placeholderTextColor="#B39DDB"
             onFocus={() => setFocusedInput("displayName")}
             onBlur={() => setFocusedInput(null)}
           />
@@ -63,7 +69,7 @@ const RegisterScreen = () => {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            placeholderTextColor="#7E57C2"
+            placeholderTextColor="#B39DDB"
             onFocus={() => setFocusedInput("email")}
             onBlur={() => setFocusedInput(null)}
           />
@@ -75,7 +81,7 @@ const RegisterScreen = () => {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholderTextColor="#7E57C2"
+            placeholderTextColor="#B39DDB"
             onFocus={() => setFocusedInput("password")}
             onBlur={() => setFocusedInput(null)}
           />
@@ -86,8 +92,8 @@ const RegisterScreen = () => {
           </TouchableOpacity>
 
           {/* Botón para iniciar sesión */}
-          <TouchableOpacity onPress={() => router.push("/login")}>
-            <Text style={styles.linkText}>¿Ya tienes cuenta? Inicia sesión</Text>
+          <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/")}>
+            <Text style={styles.registerButtonText}>¿Ya tienes cuenta? Inicia sesión</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -122,32 +128,35 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    height: 50,
-    backgroundColor: "#FFF",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    color: "#000",
+    height: 40,
+    borderBottomColor: "#7E57C2",
+    borderBottomWidth: 1,
+    marginBottom: 20,
+    paddingLeft: 8,
+    color: "#FFF",
   },
   inputFocused: {
-    backgroundColor: "#D1C4E9",
+    borderBottomColor: "#B39DDB", // Cambia el color del borde cuando está enfocado
   },
   button: {
     backgroundColor: "#7E57C2",
     paddingVertical: 12,
-    borderRadius: 5,
+    borderRadius: 25,
     alignItems: "center",
-    marginTop: 10,
+    marginBottom: 15,
   },
   buttonText: {
     color: "#FFF",
     fontWeight: "bold",
     fontSize: 16,
   },
-  linkText: {
-    color: "#B39DDB",
-    textAlign: "center",
-    marginTop: 15,
+  registerButton: {
+    alignItems: "center",
+  },
+  registerButtonText: {
+    color: "#7E57C2",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 

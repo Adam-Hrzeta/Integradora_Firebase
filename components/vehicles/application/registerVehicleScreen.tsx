@@ -10,17 +10,17 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker"; // Importa Picker
+import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
-import { db } from "@/lib/firebase"; // Importa tu configuración de Firebase
-import { collection, addDoc } from "firebase/firestore"; // Importa Firestore functions
-import { getAuth } from "firebase/auth"; // Importa Firebase Auth
+import { db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 const RegisterVehicleScreen = () => {
   const [licensePlate, setLicensePlate] = useState("");
   const [carModel, setCarModel] = useState("");
   const [carBrand, setCarBrand] = useState("");
-  const [year, setYear] = useState(""); // Año por defecto
+  const [year, setYear] = useState("");
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const router = useRouter();
 
@@ -39,17 +39,16 @@ const RegisterVehicleScreen = () => {
     }
 
     try {
-      // Guardar los datos en Firestore
       await addDoc(collection(db, "vehicles"), {
         licence: licensePlate,
         model: carModel,
         brand: carBrand,
         year: year,
-        userId: user.uid, // Asociar el vehículo al usuario autenticado
+        userId: user.uid,
       });
 
       Alert.alert("Vehículo registrado", "Tu vehículo ha sido registrado correctamente.");
-      router.push("/login"); // Redirige al inicio o donde sea necesario
+      router.push("/login");
     } catch (error) {
       console.error("Error al registrar el vehículo:", error);
       Alert.alert("Error", "Hubo un problema al registrar el vehículo. Inténtalo de nuevo.");
@@ -73,7 +72,7 @@ const RegisterVehicleScreen = () => {
 
           {/* Campo Placa */}
           <TextInput
-            style={[styles.input, focusedInput === "licensePlate" && styles.inputFocused, styles.boldText]}
+            style={[styles.input, focusedInput === "licensePlate" && styles.inputFocused]}
             placeholder="Placa (máx. 9 caracteres)"
             value={licensePlate}
             onChangeText={(text) => setLicensePlate(text.slice(0, 9))}
@@ -85,7 +84,7 @@ const RegisterVehicleScreen = () => {
 
           {/* Campo Modelo */}
           <TextInput
-            style={[styles.input, focusedInput === "carModel" && styles.inputFocused, styles.boldText]}
+            style={[styles.input, focusedInput === "carModel" && styles.inputFocused]}
             placeholder="Modelo del vehículo"
             value={carModel}
             onChangeText={setCarModel}
@@ -97,7 +96,7 @@ const RegisterVehicleScreen = () => {
 
           {/* Campo Marca */}
           <TextInput
-            style={[styles.input, focusedInput === "carBrand" && styles.inputFocused, styles.boldText]}
+            style={[styles.input, focusedInput === "carBrand" && styles.inputFocused]}
             placeholder="Marca del vehículo"
             value={carBrand}
             onChangeText={setCarBrand}
@@ -109,13 +108,12 @@ const RegisterVehicleScreen = () => {
 
           {/* Selector de Año */}
           <View style={styles.pickerContainer}>
-            <Text style={styles.pickerLabel}>Año</Text> {/* Etiqueta centrada para el campo de año */}
             <Picker
               selectedValue={year}
               onValueChange={(itemValue: React.SetStateAction<string>) => setYear(itemValue)}
               style={styles.picker}
             >
-              <Picker.Item label="Selecciona el año" value="" /> {/* Placeholder */}
+              <Picker.Item label="Selecciona el año" value="" />
               {Array.from({ length: 2025 - 1950 + 1 }, (_, i) => (
                 <Picker.Item key={i} label={`${1950 + i}`} value={`${1950 + i}`} />
               ))}
@@ -144,7 +142,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   formContainer: {
-    width: "85%", // Reducido el ancho
+    width: "80%",
     backgroundColor: "rgba(46, 39, 57, 0.8)",
     padding: 25,
     borderRadius: 15,
@@ -164,40 +162,20 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
-    justifyContent: "center",
+    color: "#000",
   },
   inputFocused: {
     backgroundColor: "#D1C4E9",
   },
-  boldText: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "#000",
-  },
   pickerContainer: {
-    backgroundColor: "#C8AAAA",
+    backgroundColor: "#FFF",
     borderRadius: 5,
     marginBottom: 10,
-    overflow: "hidden", // Para recortar el exceso de bordes
-    width: "80%", // Reducido el ancho del Picker
-    alignSelf: "center", // Centra el Picker
-    borderWidth: 1,
-    borderColor: "#7E57C2",
-    paddingVertical: 5, // Agregado padding para mayor espacio
-  },
-  pickerLabel: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#000000",
-    textAlign: "center", // Centrado de la etiqueta "Año"
+    overflow: "hidden",
   },
   picker: {
-    height: 50, // Ajustado para que se vea más limpio
-    color: "#000000",
-    width: "100%", // Asegura que el Picker ocupe todo el ancho
-    justifyContent: "center", // Centra los elementos dentro del Picker
-    textAlign: "center", // Centra el texto dentro del Picker
+    height: 50,
+    color: "#000",
   },
   button: {
     backgroundColor: "#7E57C2",

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient"; // Para el degradado del botón
 import { Vehicle } from "../entities/vehicle";
 
 interface VehicleCardProps {
@@ -11,57 +12,79 @@ interface VehicleCardProps {
 const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onDelete }) => {
   return (
     <View style={styles.vehicleItem}>
-      <View style={styles.vehicleInfo}>
-        <MaterialIcons name="directions-car" size={20} color="#7E57C2" />
-        <Text style={styles.vehicleText}>Marca: {vehicle.brand}</Text>
-      </View>
-      <View style={styles.vehicleInfo}>
-        <MaterialIcons name="confirmation-number" size={20} color="#7E57C2" />
-        <Text style={styles.vehicleText}>Placa: {vehicle.licence}</Text>
-      </View>
-      <View style={styles.vehicleInfo}>
-        <MaterialIcons name="build" size={20} color="#7E57C2" />
-        <Text style={styles.vehicleText}>Modelo: {vehicle.model}</Text>
-      </View>
-      <View style={styles.vehicleInfo}>
-        <MaterialIcons name="calendar-today" size={20} color="#7E57C2" />
-        <Text style={styles.vehicleText}>Año: {vehicle.year}</Text>
-      </View>
+      {/* Botón de eliminar con degradado */}
       <TouchableOpacity
         style={styles.deleteButton}
         onPress={() => onDelete(vehicle.id)}
       >
-        <MaterialIcons name="close" size={24} color="#FFF" />
+        <LinearGradient
+          colors={["#FF416C", "#FF4B2B"]} // Degradado rojo
+          style={styles.gradient}
+        >
+          <MaterialIcons name="delete" size={20} color="#FFF" />
+        </LinearGradient>
       </TouchableOpacity>
+
+      {/* Información del vehículo */}
+      <View style={styles.vehicleInfo}>
+        <MaterialIcons name="directions-car" size={28} color="#6C63FF" />
+        <Text style={styles.vehicleText}>Marca: {vehicle.brand}</Text>
+      </View>
+      <View style={styles.vehicleInfo}>
+        <MaterialIcons name="confirmation-number" size={28} color="#6C63FF" />
+        <Text style={styles.vehicleText}>Placa: {vehicle.licence}</Text>
+      </View>
+      <View style={styles.vehicleInfo}>
+        <MaterialIcons name="build" size={28} color="#6C63FF" />
+        <Text style={styles.vehicleText}>Modelo: {vehicle.model}</Text>
+      </View>
+      <View style={styles.vehicleInfo}>
+        <MaterialIcons name="calendar-today" size={28} color="#6C63FF" />
+        <Text style={styles.vehicleText}>Año: {vehicle.year}</Text>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   vehicleItem: {
-    padding: 15,
-    marginBottom: 10,
+    padding: 20,
+    marginBottom: 15,
     backgroundColor: "#fff",
-    borderRadius: 8,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#eee",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+    position: "relative",
   },
   vehicleInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
+    marginBottom: 15,
   },
   vehicleText: {
-    fontSize: 16,
-    color: "#555",
-    marginLeft: 10,
+    fontSize: 18,
+    color: "#444",
+    marginLeft: 15,
+    fontWeight: "600", // Texto más grueso
   },
   deleteButton: {
-    backgroundColor: "#FF3C89",
-    padding: 10,
-    borderRadius: 5,
+    position: "absolute",
+    top: 10,
+    right: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20, // Botón circular
+    overflow: "hidden", // Para que el degradado no se salga del borde
+  },
+  gradient: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
   },
 });
 
