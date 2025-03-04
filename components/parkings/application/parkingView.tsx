@@ -8,12 +8,17 @@ import {
   TouchableOpacity,
   Modal,
   ImageBackground,
+  Alert,
+  Dimensions,
 } from "react-native";
 import { Parking } from "../entities/parking";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ParkingDataSource } from "../dataSource/parkings_dataSource";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
+import { getDatabase, ref, set, onValue } from "firebase/database";
+
+const { width } = Dimensions.get("window");
 
 const ParkingScreen = () => {
   const [parkings, setParkings] = useState<Parking[]>([]);
@@ -22,14 +27,16 @@ const ParkingScreen = () => {
   const [showQRModal, setShowQRModal] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isParkingInProgress, setIsParkingInProgress] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
+
+  const auth = getAuth();
+  const database = getDatabase();
 
   useEffect(() => {
-    const auth = getAuth();
-    const dataSource = new ParkingDataSource();
-
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
+          const dataSource = new ParkingDataSource();
           const parkingsData = await dataSource.getFreeParking();
           setParkings(parkingsData);
 
@@ -56,6 +63,15 @@ const ParkingScreen = () => {
       }
     });
 
+    const notificationRef = ref(database, "notifications/waiting");
+    onValue(notificationRef, (snapshot) => {
+      const message = snapshot.val();
+      if (message) {
+        setNotification(message);
+        Alert.alert("Notificación", message);
+      }
+    });
+
     return () => unsubscribeAuth();
   }, []);
 
@@ -63,10 +79,16 @@ const ParkingScreen = () => {
     setShowQRModal(true);
     setIsParkingInProgress(true);
     setIsButtonDisabled(true);
+
+    const notificationRef = ref(database, "notifications/waiting");
+    set(notificationRef, "Espere hasta que el automóvil anterior se estacione...");
   };
 
   const closeQRModal = () => {
     setShowQRModal(false);
+
+    const notificationRef = ref(database, "notifications/waiting");
+    set(notificationRef, null);
   };
 
   if (loading) {
@@ -118,10 +140,9 @@ const ParkingScreen = () => {
           renderItem={({ item }) => (
             <View style={styles.parkingItem}>
               {getIconByStatus(item.status)}
-              <Text style={styles.parkingText}>{item.label}</Text>
-              {isParkingInProgress && (
-                <Text style={styles.waitingText}>Espere hasta que el automóvil anterior se estacione...</Text>
-              )}
+              <Text style={styles.parkingText} numberOfLines={1} ellipsizeMode="tail">
+                {item.label}
+              </Text>
             </View>
           )}
           contentContainerStyle={styles.listContainer}
@@ -188,15 +209,16 @@ const styles = StyleSheet.create({
     color: "green",
   },
   listContainer: {
-    justifyContent: "flex-start", // Alinear a la izquierda
-    paddingLeft: 10, // Espacio a la izquierda
+    justifyContent: "flex-start",
+    paddingLeft: 10,
   },
   parkingItem: {
-    width: 100,
+    width: 100, // Ajusta el ancho dinámicamente
     height: 120,
     justifyContent: "center",
     alignItems: "center",
-    margin: 10,
+    margin: 5,
+    padding: 10, // Añade padding interno
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 10,
     shadowColor: "#000",
@@ -209,12 +231,8 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 14,
     color: "#333",
-  },
-  waitingText: {
-    marginTop: 5,
-    fontSize: 12,
-    color: "#ff5722",
     textAlign: "center",
+    width: "100%", // Asegura que el texto no desborde
   },
   parkingButton: {
     marginTop: 20,

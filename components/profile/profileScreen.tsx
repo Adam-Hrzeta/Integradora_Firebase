@@ -13,12 +13,11 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { auth } from "../../lib/firebase";
-import { updateEmail, updateProfile, updatePassword } from "firebase/auth";
+import { updateProfile, updatePassword } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
-import EmailModal from "../EmailModal";
 import PasswordModal from "./NewPasswordModal";
 import NameModal from "./NewNameModal";
-import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 const ProfileScreen = () => {
   const [email, setEmail] = useState("");
@@ -26,7 +25,6 @@ const ProfileScreen = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(auth.currentUser);
-  const [emailModalVisible, setEmailModalVisible] = useState(false);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [nameModalVisible, setNameModalVisible] = useState(false);
   const router = useRouter();
@@ -38,7 +36,7 @@ const ProfileScreen = () => {
         setEmail(user.email || "");
         setProfileImage(user.photoURL || null);
       } else {
-        router.push("/login");
+        router.push("/");
       }
     });
 
@@ -229,8 +227,8 @@ const styles = StyleSheet.create({
   },
   editName: {
     position: "absolute",
-    bottom: 345,
-    right: 75,
+    bottom: 320,
+    right: 40,
     backgroundColor: "#7E57C2",
     borderRadius: 15,
     padding: 4,
