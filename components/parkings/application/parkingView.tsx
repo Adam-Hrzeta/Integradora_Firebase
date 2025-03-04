@@ -79,7 +79,7 @@ const ParkingScreen = () => {
             case "servicio":
                 return <Entypo name="tools" size={24} color="orange" />;
             default:
-                return <FontAwesome5 name="check-circle" size={24} color="green" />;
+                return <Text style={styles.freeText}>Disponible</Text>;
         }
     };
 
@@ -93,7 +93,7 @@ const ParkingScreen = () => {
                 renderItem={({ item }) => (
                     <View style={styles.parkingItem}>
                         {getIconByStatus(item.status)}
-                        <Text style={styles.parkingText}>Cajón {item.label}</Text>
+                        <Text style={styles.parkingText}>{item.label}</Text>
                         {isParkingInProgress && (
                             <Text style={styles.waitingText}>Espere hasta que el automóvil anterior se estacione...</Text>
                         )}
@@ -141,6 +141,13 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 20,
         textAlign: "center",
+    },
+    freeText: {
+        fontSize: 15,
+        fontWeight: "bold",
+        marginBottom: 20,
+        textAlign: "center",
+        color: "green",
     },
     listContainer: {
         justifyContent: "center",
