@@ -5,7 +5,7 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Octicons } from '@expo/vector-icons';
+import { AntDesign, Fontisto, Octicons, SimpleLineIcons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -29,21 +29,21 @@ export default function TabLayout() {
         name="register"
         options={{
           title: 'Registro',
-          tabBarIcon: ({ color }) => <Octicons name="people" size={24} color="black" />,
+          tabBarIcon: ({ color }) => <AntDesign name="addusergroup" size={24} color="black" />,
         }}
       />
       <Tabs.Screen
         name="login"
         options={{
           title: 'Inicio de sesión',
-          tabBarIcon: ({ color }) => <Octicons name="people" size={24} color="black" />,
+          tabBarIcon: ({ color }) => <SimpleLineIcons name="login" size={24} color="black" />,
         }}
       />
       <Tabs.Screen
         name="registerVehicle"
         options={{
           title: 'Registro de vehiculo',
-          tabBarIcon: ({ color }) => <Octicons name="people" size={24} color="black" />,
+          tabBarIcon: ({ color }) => <Fontisto name="car" size={24} color="black" />,
         }}
       />
     </Tabs>

@@ -77,7 +77,12 @@ const ParkingScreen = () => {
             case "ocupado":
                 return <AntDesign name="closecircle" size={24} color="red" />;
             case "servicio":
-                return <Entypo name="tools" size={24} color="orange" />;
+                return (
+                    <View>
+                        <Entypo style={styles.iconService} name="tools" size={24} color="orange"/>
+                        <Text style={styles.serviceText}>En servicio</Text>
+                    </View>
+                );
             default:
                 return <Text style={styles.freeText}>Disponible</Text>;
         }
@@ -136,16 +141,28 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: "#f5f5f5",
     },
+    iconService:{ 
+        flexDirection: "row",
+        alignItems: "center",
+        left: 23,
+    },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 20,
         textAlign: "center",
     },
+    serviceText:{
+        fontSize: 15,
+        fontWeight: "bold",
+        marginBottom: 4,
+        textAlign: "center",
+        color: "orange",
+    },
     freeText: {
         fontSize: 15,
         fontWeight: "bold",
-        marginBottom: 20,
+        marginBottom: 5,
         textAlign: "center",
         color: "green",
     },

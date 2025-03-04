@@ -5,7 +5,7 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Octicons } from '@expo/vector-icons';
+import { Fontisto, Octicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -26,17 +26,17 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
-        name="index"
+        name="profile"
         options={{
-          title: 'Episodios',
-          tabBarIcon: ({ color }) => <Octicons name="video" size={24} color="black" />,
+          title: 'Perfil de ususario',
+          tabBarIcon: ({ color }) => <Fontisto name="person" size={24} color="black" />,
         }}
       />
       <Tabs.Screen
-        name="scroll"
+        name="vehicles"
         options={{
-          title: 'Episodios con scroll infinito',
-          tabBarIcon: ({ color }) => <Octicons name="video" size={24} color="black" />,
+          title: 'Vehiculos registrados',
+          tabBarIcon: ({ color }) => <Fontisto name="car" size={24} color="black" />,
         }}
       />
     </Tabs>

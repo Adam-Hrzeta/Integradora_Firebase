@@ -1,40 +1,76 @@
 import React, { useState } from "react";
-import { 
-  View, TextInput, Text, Alert, 
-  StyleSheet, KeyboardAvoidingView, Platform, 
-  ImageBackground, TouchableOpacity 
+import {
+  View,
+  TextInput,
+  Text,
+  Alert,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ImageBackground,
+  TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker"; // Importa Picker
 import { useRouter } from "expo-router";
+import { db } from "@/lib/firebase"; // Importa tu configuración de Firebase
+import { collection, addDoc } from "firebase/firestore"; // Importa Firestore functions
+import { getAuth } from "firebase/auth"; // Importa Firebase Auth
 
-const RegisterScreenVehicle = () => {
+const RegisterVehicleScreen = () => {
   const [licensePlate, setLicensePlate] = useState("");
   const [carModel, setCarModel] = useState("");
-  const [carBrand, setCarBrand] = useState(""); // Marca del vehículo
-  const [year, setYear] = useState("2025"); // Año por defecto
+  const [carBrand, setCarBrand] = useState("");
+  const [year, setYear] = useState(""); // Año por defecto
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleRegisterVehicle = () => {
+  const handleRegisterVehicle = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      Alert.alert("Error", "No hay un usuario autenticado.");
+      return;
+    }
+
     if (!licensePlate || !carModel || !carBrand) {
       Alert.alert("Error", "Por favor, completa todos los campos.");
       return;
     }
 
-    Alert.alert("Vehículo registrado", "Tu vehículo ha sido registrado correctamente.");
-    router.push("/login"); // Redirige al inicio o donde sea necesario
+    try {
+      // Guardar los datos en Firestore
+      await addDoc(collection(db, "vehicles"), {
+        licence: licensePlate,
+        model: carModel,
+        brand: carBrand,
+        year: year,
+        userId: user.uid, // Asociar el vehículo al usuario autenticado
+      });
+
+      Alert.alert("Vehículo registrado", "Tu vehículo ha sido registrado correctamente.");
+      router.push("/login"); // Redirige al inicio o donde sea necesario
+    } catch (error) {
+      console.error("Error al registrar el vehículo:", error);
+      Alert.alert("Error", "Hubo un problema al registrar el vehículo. Inténtalo de nuevo.");
+    }
   };
 
   return (
     <ImageBackground
-      source={{ uri: "https://static.vecteezy.com/system/resources/previews/025/515/340/original/parking-top-view-garage-floor-with-cars-from-above-city-parking-lot-with-free-space-cartoon-street-carpark-with-various-vehicles-illustration-vector.jpg" }}
+      source={{
+        uri: "https://static.vecteezy.com/system/resources/previews/025/515/340/original/parking-top-view-garage-floor-with-cars-from-above-city-parking-lot-with-free-space-cartoon-street-carpark-with-various-vehicles-illustration-vector.jpg",
+      }}
       style={styles.background}
       blurRadius={10}
     >
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
         <View style={styles.formContainer}>
           <Text style={styles.title}>Registro de Vehículo</Text>
-          
+
           {/* Campo Placa */}
           <TextInput
             style={[styles.input, focusedInput === "licensePlate" && styles.inputFocused, styles.boldText]}
@@ -157,7 +193,7 @@ const styles = StyleSheet.create({
     textAlign: "center", // Centrado de la etiqueta "Año"
   },
   picker: {
-    height: 50,  // Ajustado para que se vea más limpio
+    height: 50, // Ajustado para que se vea más limpio
     color: "#000000",
     width: "100%", // Asegura que el Picker ocupe todo el ancho
     justifyContent: "center", // Centra los elementos dentro del Picker
@@ -177,4 +213,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterScreenVehicle;
+export default RegisterVehicleScreen;
