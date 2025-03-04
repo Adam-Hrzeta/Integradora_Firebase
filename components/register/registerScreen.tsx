@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, Text, Alert, StyleSheet, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
+import { 
+  View, TextInput, Button, Text, Alert, 
+  StyleSheet, KeyboardAvoidingView, Platform, 
+  ImageBackground, TouchableOpacity 
+} from "react-native";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { auth } from "../../lib/firebase";
@@ -7,68 +11,84 @@ import { auth } from "../../lib/firebase";
 const RegisterScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState(""); // Nuevo estado para el displayName
+  const [displayName, setDisplayName] = useState("");
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const router = useRouter();
 
   const handleRegister = async () => {
     try {
-      // Registrar al usuario con correo y contraseña
+      // Registrar usuario
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-      // Actualizar el perfil del usuario con el displayName
-      await updateProfile(userCredential.user, {
-        displayName: displayName, // Aquí se agrega el displayName
-      });
+      await updateProfile(userCredential.user, { displayName });
 
       // Enviar correo de verificación
       await sendEmailVerification(userCredential.user);
 
-      // Mostrar alerta y redirigir al login
-      Alert.alert("Cuenta creada", "Se ha enviado un correo de verificación. Revisa tu bandeja.");
-      router.push("/login");
+      Alert.alert("Cuenta creada", "Se ha enviado un correo de verificación. Ahora registra tu vehículo.");
+
+      // Redirigir al formulario de registro de vehículo
+      router.push("/register-vehicle");
     } catch (error) {
-      const errorMessage = (error as Error).message;
-      Alert.alert("Error", errorMessage);
+      Alert.alert("Error", (error as Error).message);
     }
   };
 
   return (
     <ImageBackground
-      source={{ uri: 'https://static.vecteezy.com/system/resources/previews/025/515/340/original/parking-top-view-garage-floor-with-cars-from-above-city-parking-lot-with-free-space-cartoon-street-carpark-with-various-vehicles-illustration-vector.jpg' }}
+      source={{ uri: "https://static.vecteezy.com/system/resources/previews/025/515/340/original/parking-top-view-garage-floor-with-cars-from-above-city-parking-lot-with-free-space-cartoon-street-carpark-with-various-vehicles-illustration-vector.jpg" }}
       style={styles.background}
       blurRadius={10}
     >
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>Registro</Text>
-          {/* Nuevo campo para el displayName */}
+          
+          {/* Campo Nombre Completo */}
           <TextInput
-            style={styles.input}
+            style={[styles.input, focusedInput === "displayName" && styles.inputFocused]}
             placeholder="Nombre completo"
             value={displayName}
             onChangeText={setDisplayName}
             autoCapitalize="words"
-            placeholderTextColor="#B39DDB"
+            placeholderTextColor="#7E57C2"
+            onFocus={() => setFocusedInput("displayName")}
+            onBlur={() => setFocusedInput(null)}
           />
+
+          {/* Campo Correo Electrónico */}
           <TextInput
-            style={styles.input}
+            style={[styles.input, focusedInput === "email" && styles.inputFocused]}
             placeholder="Correo electrónico"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            placeholderTextColor="#B39DDB"
+            placeholderTextColor="#7E57C2"
+            onFocus={() => setFocusedInput("email")}
+            onBlur={() => setFocusedInput(null)}
           />
+
+          {/* Campo Contraseña */}
           <TextInput
-            style={styles.input}
+            style={[styles.input, focusedInput === "password" && styles.inputFocused]}
             placeholder="Contraseña"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholderTextColor="#B39DDB"
+            placeholderTextColor="#7E57C2"
+            onFocus={() => setFocusedInput("password")}
+            onBlur={() => setFocusedInput(null)}
           />
-          <Button title="Registrarse" onPress={handleRegister} color="#7E57C2" />
-          <Button title="¿Ya tienes cuenta? Inicia Sesión" onPress={() => router.push("/login")} color="#B39DDB" />
+
+          {/* Botón Registrarse */}
+          <TouchableOpacity style={styles.button} onPress={handleRegister}>
+            <Text style={styles.buttonText}>Registrarse</Text>
+          </TouchableOpacity>
+
+          {/* Botón para iniciar sesión */}
+          <TouchableOpacity onPress={() => router.push("/login")}>
+            <Text style={styles.linkText}>¿Ya tienes cuenta? Inicia sesión</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </ImageBackground>
@@ -78,36 +98,56 @@ const RegisterScreen = () => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
+    resizeMode: "cover",
+    justifyContent: "center",
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   formContainer: {
-    width: '80%',
-    backgroundColor: 'rgba(46, 39, 57, 0.8)',
+    width: "80%",
+    backgroundColor: "rgba(46, 39, 57, 0.8)",
     padding: 25,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#FFF',
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#FFF",
     marginBottom: 20,
   },
   input: {
-    height: 40,
-    borderBottomColor: '#7E57C2',
-    borderBottomWidth: 1,
+    height: 50,
+    backgroundColor: "#FFF",
+    borderRadius: 5,
+    paddingHorizontal: 10,
     marginBottom: 10,
-    paddingLeft: 8,
-    color: '#FFF',
+    color: "#000",
+  },
+  inputFocused: {
+    backgroundColor: "#D1C4E9",
+  },
+  button: {
+    backgroundColor: "#7E57C2",
+    paddingVertical: 12,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  linkText: {
+    color: "#B39DDB",
+    textAlign: "center",
+    marginTop: 15,
   },
 });
 

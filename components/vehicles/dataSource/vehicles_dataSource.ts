@@ -1,31 +1,34 @@
 import { db } from "@/lib/firebase";
 import { Vehicle } from "../entities/vehicle";
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
-export class VehiclesDataSource{
-    constructor(){}
+export class VehiclesDataSource {
+    constructor() {}
 
-    async getUserVehicle() : Promise<Vehicle[]>{
-        //en items vamos a almacenar los documentos traidos de firabase
+    async getUserVehicle(uid: string, vehicle: Vehicle): Promise<Vehicle[]> {
+        // En items vamos a almacenar los documentos traídos de Firebase
         const items: Vehicle[] = [];
 
-        //traer los vehiculos del usuario
-        const docSnap = await getDocs(query(collection(db, "vehicles")));
-        //para leer los datos se usa data() del snapshot
+        // Traer los vehículos del usuario filtrados por userId (suponiendo que el campo en Firebase es 'userId')
+        const vehiclesRef = collection(db, "vehicles");
+        const q = query(vehiclesRef, where("userId", "==", uid));  // Filtrar por userId
+
+        const docSnap = await getDocs(q);
+
+        // Para leer los datos se usa data() del snapshot
         docSnap.forEach((doc) => {
             console.log(doc.id, "=>", doc.data());
 
-            //transformar cada documento a un objeto Vehicle
-            // ---> Mapping
+            // Transformar cada documento a un objeto Vehicle
             const docData = doc.data();
 
-            const item : Vehicle = {
+            const item: Vehicle = {
                 id: doc.id,
                 brand: docData.brand,
                 licence: docData.licence,
                 model: docData.model,
                 year: docData.year,
-            }
+            };
 
             items.push(item);
         });

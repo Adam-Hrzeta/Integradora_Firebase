@@ -15,7 +15,7 @@ const VehiclesScreen = () => {
             if (user) {
                 try {
                     const dataSource = new VehiclesDataSource();
-                    const vehiclesData = await dataSource.getUserVehicle();
+                    const vehiclesData = await dataSource.getUserVehicle(user.uid);  // Pasamos el uid del usuario aquí
                     setVehicles(vehiclesData);
                 } catch (error) {
                     console.error("Error fetching vehicles:", error);
