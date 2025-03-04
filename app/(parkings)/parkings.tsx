@@ -1,5 +1,5 @@
 import ParkingScreen from "@/components/parkings/application/parkingView";
 
-export default function TabTwoScreen() {
+export default function Parkings() {
     return(<ParkingScreen/>)
 }

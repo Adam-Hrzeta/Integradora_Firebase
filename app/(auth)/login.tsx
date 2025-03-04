@@ -1,5 +1,5 @@
 import LoginScreen from "@/components/login/loginScreen";
 
-export default function TabTwoScreen() {
+export default function Login() {
     return(<LoginScreen/>)
 }

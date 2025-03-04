@@ -26,7 +26,7 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
-        name="index"
+        name="Vehicles"
         options={{
           title: 'Lista de vehiculos registrados',
           tabBarIcon: ({ color }) => <Octicons name="video" size={24} color="black" />,

@@ -26,7 +26,7 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
-        name="index"
+        name="parkings"
         options={{
           title: 'Lotes disponibles',
           tabBarIcon: ({ color }) => <Octicons name="check" size={24} color="black" />,

@@ -26,16 +26,23 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
-        name="index"
+        name="register"
         options={{
           title: 'Registro',
           tabBarIcon: ({ color }) => <Octicons name="people" size={24} color="black" />,
         }}
       />
       <Tabs.Screen
-        name="scroll"
+        name="login"
         options={{
           title: 'Inicio de sesión',
+          tabBarIcon: ({ color }) => <Octicons name="people" size={24} color="black" />,
+        }}
+      />
+      <Tabs.Screen
+        name="registerVehicle"
+        options={{
+          title: 'Registro de vehiculo',
           tabBarIcon: ({ color }) => <Octicons name="people" size={24} color="black" />,
         }}
       />

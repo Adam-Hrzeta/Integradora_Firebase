@@ -1,6 +1,6 @@
 import ProfileScreen from "@/components/profile/profileScreen";
 
-export default function ProfileScroll() {
+export default function Profile() {
     return(
      <ProfileScreen/>
     );

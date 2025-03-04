@@ -1,5 +1,5 @@
 import RegisterScreen from "@/components/register/registerScreen";
 
-export default function TabTwoScreen() {
+export default function Register() {
     return(<RegisterScreen/>)
 }
