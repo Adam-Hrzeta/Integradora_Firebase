@@ -18,7 +18,7 @@ import * as ImagePicker from "expo-image-picker";
 import EmailModal from "../EmailModal";
 import PasswordModal from "./NewPasswordModal";
 import NameModal from "./NewNameModal";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 const ProfileScreen = () => {
   const [email, setEmail] = useState("");
@@ -48,29 +48,6 @@ const ProfileScreen = () => {
   if (!user) {
     return <Text>Inicie sesión para acceder a su perfil...</Text>;
   }
-
-  const handleUpdateEmail = async (newEmail: string) => {
-    if (!newEmail) {
-      Alert.alert("Error", "El correo electrónico no puede estar vacío.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await updateEmail(user, newEmail);
-      setEmail(newEmail);
-      setEmailModalVisible(false);
-      Alert.alert("Éxito", "Correo electrónico actualizado correctamente.");
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert("Error", error.message);
-      } else {
-        Alert.alert("Error", "Ocurrió un error inesperado.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleUpdatePassword = async (newPassword: string) => {
     if (!newPassword) {
@@ -161,19 +138,16 @@ const ProfileScreen = () => {
           </View>
 
           {/* Nombre del usuario */}
-          <TouchableOpacity style={styles.editButton} onPress={() => setNameModalVisible(true)}>
-            <Text style={styles.editButtonText}>Cambiar Nombre</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.editName} onPress={() => setNameModalVisible(true)}>
+              <MaterialIcons name="drive-file-rename-outline" size={24} color="white" />
+            </TouchableOpacity>
 
           {/* Correo electrónico */}
           <Text style={styles.label}>Correo electrónico:</Text>
           <Text style={styles.emailText}>{email}</Text>
 
           {/* Botones para editar correo y contraseña */}
-          <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.button} onPress={() => setEmailModalVisible(true)}>
-              <Text style={styles.buttonText}>Editar Correo</Text>
-            </TouchableOpacity>
+          <View>
             <TouchableOpacity style={styles.button} onPress={() => setPasswordModalVisible(true)}>
               <Text style={styles.buttonText}>Cambiar Contraseña</Text>
             </TouchableOpacity>
@@ -182,13 +156,6 @@ const ProfileScreen = () => {
           {loading && <ActivityIndicator size="large" color="#7E57C2" />}
         </View>
 
-        {/* Modales */}
-        <EmailModal
-          visible={emailModalVisible}
-          onClose={() => setEmailModalVisible(false)}
-          onUpdateEmail={handleUpdateEmail}
-          currentEmail={email}
-        />
         <PasswordModal
           visible={passwordModalVisible}
           onClose={() => setPasswordModalVisible(false)}
@@ -256,6 +223,14 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 5,
   },
+  editName: {
+    position: "absolute",
+    bottom: 345,
+    right: 75,
+    backgroundColor: "#7E57C2",
+    borderRadius: 15,
+    padding: 4,
+  },
   editButton: {
     backgroundColor: "#7E57C2",
     borderRadius: 10,
@@ -280,17 +255,15 @@ const styles = StyleSheet.create({
     color: "#B39DDB",
     marginBottom: 20,
   },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
   button: {
     backgroundColor: "#7E57C2",
     borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    width: "48%",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    width: "100%",
+    justifyContent: "center",
+    marginTop: 45,
   },
   buttonText: {
     color: "#FFF",

@@ -1,10 +1,11 @@
 import { db } from "@/lib/firebase";
 import { Vehicle } from "../entities/vehicle";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, deleteDoc } from "firebase/firestore";
 
 export class VehiclesDataSource {
   constructor() {}
 
+  // Obtener vehículos del usuario
   async getUserVehicle(uid: string): Promise<Vehicle[]> {
     const items: Vehicle[] = [];
 
@@ -32,5 +33,17 @@ export class VehiclesDataSource {
     });
 
     return items;
+  }
+
+  // Eliminar un vehículo por su ID
+  async deleteVehicle(vehicleId: string): Promise<void> {
+    try {
+      const vehicleRef = doc(db, "vehicles", vehicleId);
+      await deleteDoc(vehicleRef);
+      console.log("Vehículo eliminado correctamente");
+    } catch (error) {
+      console.error("Error al eliminar el vehículo:", error);
+      throw error;
+    }
   }
 }
