@@ -77,7 +77,7 @@ const RegisterVehicleScreen = () => {
             value={licensePlate}
             onChangeText={(text) => setLicensePlate(text.slice(0, 9))}
             autoCapitalize="characters"
-            placeholderTextColor="#7E57C2"
+            placeholderTextColor="#B39DDB"
             onFocus={() => setFocusedInput("licensePlate")}
             onBlur={() => setFocusedInput(null)}
           />
@@ -89,7 +89,7 @@ const RegisterVehicleScreen = () => {
             value={carModel}
             onChangeText={setCarModel}
             autoCapitalize="words"
-            placeholderTextColor="#7E57C2"
+            placeholderTextColor="#B39DDB"
             onFocus={() => setFocusedInput("carModel")}
             onBlur={() => setFocusedInput(null)}
           />
@@ -101,7 +101,7 @@ const RegisterVehicleScreen = () => {
             value={carBrand}
             onChangeText={setCarBrand}
             autoCapitalize="words"
-            placeholderTextColor="#7E57C2"
+            placeholderTextColor="#B39DDB"
             onFocus={() => setFocusedInput("carBrand")}
             onBlur={() => setFocusedInput(null)}
           />
@@ -112,10 +112,17 @@ const RegisterVehicleScreen = () => {
               selectedValue={year}
               onValueChange={(itemValue: React.SetStateAction<string>) => setYear(itemValue)}
               style={styles.picker}
+              dropdownIconColor="#B39DDB" 
+              mode="dropdown" 
+              itemStyle={styles.pickerItem} 
             >
               <Picker.Item label="Selecciona el año" value="" />
               {Array.from({ length: 2025 - 1950 + 1 }, (_, i) => (
-                <Picker.Item key={i} label={`${1950 + i}`} value={`${1950 + i}`} />
+                <Picker.Item
+                  key={i}
+                  label={`${1950 + i}`}
+                  value={`${1950 + i}`}
+                />
               ))}
             </Picker>
           </View>
@@ -157,32 +164,37 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    height: 50,
-    backgroundColor: "#FFF",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    color: "#000",
+    height: 40,
+    borderBottomColor: "#7E57C2",
+    borderBottomWidth: 1,
+    marginBottom: 20,
+    paddingLeft: 8,
+    color: "#FFF",
   },
   inputFocused: {
-    backgroundColor: "#D1C4E9",
+    borderBottomColor: "#B39DDB", 
   },
   pickerContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: "rgba(255, 255, 255, 0.1)", 
     borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: 20,
     overflow: "hidden",
   },
   picker: {
     height: 50,
-    color: "#000",
+    color: "#FFF",
+    backgroundColor: "transparent", 
+  },
+  pickerItem: {
+    color: "#000", 
+    backgroundColor: "#FFF", 
   },
   button: {
     backgroundColor: "#7E57C2",
     paddingVertical: 12,
-    borderRadius: 5,
+    borderRadius: 25,
     alignItems: "center",
-    marginTop: 10,
+    marginBottom: 15,
   },
   buttonText: {
     color: "#FFF",

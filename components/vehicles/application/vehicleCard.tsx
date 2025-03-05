@@ -18,7 +18,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onDelete }) => {
         onPress={() => onDelete(vehicle.id)}
       >
         <LinearGradient
-          colors={["#FF416C", "#FF4B2B"]} // Degradado rojo
+          colors={["#FF416C", "#FF4B2B"]} 
           style={styles.gradient}
         >
           <MaterialIcons name="delete" size={20} color="#FFF" />
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#444",
     marginLeft: 15,
-    fontWeight: "600", // Texto más grueso
+    fontWeight: "600", 
   },
   deleteButton: {
     position: "absolute",
@@ -78,8 +78,8 @@ const styles = StyleSheet.create({
     right: 10,
     width: 40,
     height: 40,
-    borderRadius: 20, // Botón circular
-    overflow: "hidden", // Para que el degradado no se salga del borde
+    borderRadius: 20, 
+    overflow: "hidden", 
   },
   gradient: {
     flex: 1,
