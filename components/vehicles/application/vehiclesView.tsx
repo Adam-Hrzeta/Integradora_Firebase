@@ -14,13 +14,16 @@ import { Vehicle } from "../entities/vehicle";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient"; // Para el degradado del botón
+import { LinearGradient } from "expo-linear-gradient";
 import VehicleCard from "../../../components/vehicles/application/vehicleCard";
+import EditVehicleModal from "../../../components/vehicles/application/EditVehicleModal";
 
 const VehiclesScreen = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const router = useRouter();
 
   const loadVehicles = async (uid: string) => {
@@ -69,6 +72,27 @@ const VehiclesScreen = () => {
     }
   };
 
+  const handleEditVehicle = (vehicle: Vehicle) => {
+    setEditingVehicle(vehicle);
+    setIsModalVisible(true);
+  };
+
+  const handleSaveVehicle = async (vehicle: Vehicle) => {
+    try {
+      const dataSource = new VehiclesDataSource();
+      await dataSource.updateVehicle(vehicle);
+      Alert.alert("Vehículo actualizado", "El vehículo ha sido actualizado correctamente.");
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        await loadVehicles(user.uid);
+      }
+    } catch (error) {
+      console.error("Error al actualizar el vehículo:", error);
+      Alert.alert("Error", "Hubo un problema al actualizar el vehículo. Inténtalo de nuevo.");
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -100,7 +124,11 @@ const VehiclesScreen = () => {
             data={vehicles}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <VehicleCard vehicle={item} onDelete={handleDeleteVehicle} />
+              <VehicleCard
+                vehicle={item}
+                onDelete={handleDeleteVehicle}
+                onEdit={handleEditVehicle}
+              />
             )}
             contentContainerStyle={styles.listContent}
           />
@@ -112,12 +140,20 @@ const VehiclesScreen = () => {
           onPress={() => router.push("/registerVehicle")}
         >
           <LinearGradient
-            colors={["#6C63FF", "#8E85FF"]} // Degradado morado
+            colors={["#6C63FF", "#8E85FF"]}
             style={styles.gradient}
           >
             <MaterialIcons name="add" size={30} color="#FFF" />
           </LinearGradient>
         </TouchableOpacity>
+        {editingVehicle && (
+          <EditVehicleModal
+            visible={isModalVisible}
+            onClose={() => setIsModalVisible(false)}
+            vehicle={editingVehicle}
+            onSave={handleSaveVehicle}
+          />
+        )}
       </View>
     </ImageBackground>
   );
@@ -176,7 +212,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   listContent: {
-    paddingBottom: 80, // Espacio para el botón flotante
+    paddingBottom: 80,
   },
 });
 

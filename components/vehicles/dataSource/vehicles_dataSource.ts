@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase";
 import { Vehicle } from "../entities/vehicle";
-import { collection, getDocs, query, where, doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, deleteDoc, updateDoc } from "firebase/firestore";
 
 export class VehiclesDataSource {
   constructor() {}
@@ -43,6 +43,22 @@ export class VehiclesDataSource {
       console.log("Vehículo eliminado correctamente");
     } catch (error) {
       console.error("Error al eliminar el vehículo:", error);
+      throw error;
+    }
+  }
+
+  async updateVehicle(vehicle: Vehicle): Promise<void> {
+    try {
+      const vehicleRef = doc(db, "vehicles", vehicle.id);
+      await updateDoc(vehicleRef, {
+        brand: vehicle.brand,
+        model: vehicle.model,
+        year: vehicle.year,
+        licence: vehicle.licence,
+      });
+      console.log("Vehículo actualizado correctamente");
+    } catch (error) {
+      console.error("Error al actualizar el vehículo:", error);
       throw error;
     }
   }

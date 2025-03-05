@@ -7,9 +7,10 @@ import { Vehicle } from "../entities/vehicle";
 interface VehicleCardProps {
   vehicle: Vehicle;
   onDelete: (vehicleId: string) => void;
+  onEdit: (vehicle: Vehicle) => void; // Nueva prop para editar
 }
 
-const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onDelete }) => {
+const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onDelete, onEdit }) => {
   return (
     <View style={styles.vehicleItem}>
       {/* Botón de eliminar con degradado */}
@@ -18,10 +19,23 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onDelete }) => {
         onPress={() => onDelete(vehicle.id)}
       >
         <LinearGradient
-          colors={["#FF416C", "#FF4B2B"]} 
+          colors={["#FF416C", "#FF4B2B"]}
           style={styles.gradient}
         >
           <MaterialIcons name="delete" size={20} color="#FFF" />
+        </LinearGradient>
+      </TouchableOpacity>
+
+      {/* Botón de editar con degradado */}
+      <TouchableOpacity
+        style={styles.editButton}
+        onPress={() => onEdit(vehicle)} // Llama a la función onEdit con el vehículo
+      >
+        <LinearGradient
+          colors={["#6C63FF", "#8E85FF"]} // Degradado morado
+          style={styles.gradient}
+        >
+          <MaterialIcons name="edit" size={20} color="#FFF" />
         </LinearGradient>
       </TouchableOpacity>
 
@@ -70,7 +84,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#444",
     marginLeft: 15,
-    fontWeight: "600", 
+    fontWeight: "600",
   },
   deleteButton: {
     position: "absolute",
@@ -78,8 +92,17 @@ const styles = StyleSheet.create({
     right: 10,
     width: 40,
     height: 40,
-    borderRadius: 20, 
-    overflow: "hidden", 
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  editButton: {
+    position: "absolute",
+    top: 10,
+    right: 60, // Ajusta la posición para que no se superponga con el botón de eliminar
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: "hidden",
   },
   gradient: {
     flex: 1,
