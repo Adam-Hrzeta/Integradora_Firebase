@@ -102,6 +102,19 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut(); // Cerrar sesión
+      router.push("/"); // Redirigir al usuario a la pantalla de inicio de sesión
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message);
+      } else {
+        Alert.alert("Error", "Ocurrió un error al cerrar la sesión.");
+      }
+    }
+  };
+
   const handleUpdateName = async (newName: string) => {
     try {
       setLoading(true);
@@ -155,6 +168,11 @@ const ProfileScreen = () => {
                 <Text style={styles.buttonText}>Cambiar Contraseña</Text>
               </TouchableOpacity>
             </View>
+
+             {/* Botón para cerrar sesión */}
+          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <Text style={styles.signOutButtonText}>Cerrar Sesión</Text>
+          </TouchableOpacity>
 
             {loading && <ActivityIndicator size="large" color="#7E57C2" />}
           </View>
@@ -251,6 +269,18 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   buttonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  signOutButton: {
+    backgroundColor: "#FF3B30", // Color rojo para el botón de cerrar sesión
+    borderRadius: 25,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  signOutButtonText: {
     color: "#FFF",
     fontSize: 16,
     fontWeight: "bold",
