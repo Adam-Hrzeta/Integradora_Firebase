@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   editName: {
     position: "absolute",
-    bottom: 320,
+    bottom: 380,
     right: 40,
     backgroundColor: "#7E57C2",
     borderRadius: 15,
