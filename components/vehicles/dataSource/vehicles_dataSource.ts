@@ -1,38 +1,33 @@
 import { db } from "@/lib/firebase";
 import { Vehicle } from "../entities/vehicle";
-import { collection, getDocs, query, where, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { collection, query, where, doc, deleteDoc, updateDoc, onSnapshot } from "firebase/firestore";
 
 export class VehiclesDataSource {
   constructor() {}
 
-  // Obtener vehículos del usuario
-  async getUserVehicle(uid: string): Promise<Vehicle[]> {
-    const items: Vehicle[] = [];
-
-    // Traer los vehículos del usuario filtrados por userId
+  // Obtener vehículos del usuario en tiempo real
+  async getUserVehicle(uid: string, callback: (vehicles: Vehicle[]) => void): Promise<() => void> {
     const vehiclesRef = collection(db, "vehicles");
-    const q = query(vehiclesRef, where("userId", "==", uid)); // Filtrar por userId
+    const q = query(vehiclesRef, where("userId", "==", uid));
 
-    const docSnap = await getDocs(q);
-
-    // Para leer los datos se usa data() del snapshot
-    docSnap.forEach((doc) => {
-      console.log(doc.id, "=>", doc.data());
-
-      const docData = doc.data();
-
-      const item: Vehicle = {
-        id: doc.id,
-        brand: docData.brand,
-        licence: docData.licence,
-        model: docData.model,
-        year: docData.year,
-      };
-
-      items.push(item);
+    // Escuchar cambios en la colección
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const items: Vehicle[] = [];
+      querySnapshot.forEach((doc) => {
+        const docData = doc.data();
+        const item: Vehicle = {
+          id: doc.id,
+          brand: docData.brand,
+          licence: docData.licence,
+          model: docData.model,
+          year: docData.year,
+        };
+        items.push(item);
+      });
+      callback(items);
     });
 
-    return items;
+    return unsubscribe; // Retornar la función para dejar de escuchar cambios
   }
 
   // Eliminar un vehículo por su ID
@@ -47,6 +42,7 @@ export class VehiclesDataSource {
     }
   }
 
+  // Actualizar un vehículo
   async updateVehicle(vehicle: Vehicle): Promise<void> {
     try {
       const vehicleRef = doc(db, "vehicles", vehicle.id);

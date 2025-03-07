@@ -7,6 +7,7 @@ import { useRouter } from "expo-router"; // Importa useRouter de Expo Router
 interface PasswordModalProps {
   visible: boolean;
   onClose: () => void;
+  onUpdatePassword: (newPassword: string) => Promise<void>; 
 }
 
 const PasswordModal: React.FC<PasswordModalProps> = ({ visible, onClose }) => {

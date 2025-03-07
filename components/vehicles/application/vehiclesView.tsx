@@ -26,26 +26,19 @@ const VehiclesScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const router = useRouter();
 
-  const loadVehicles = async (uid: string) => {
-    try {
-      const dataSource = new VehiclesDataSource();
-      const vehiclesData = await dataSource.getUserVehicle(uid);
-      setVehicles(vehiclesData);
-      setError(null);
-    } catch (error) {
-      console.error("Error fetching vehicles:", error);
-      setError("Error al cargar los vehículos. Inténtalo de nuevo.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log("Usuario autenticado, UID:", user.uid);
-        await loadVehicles(user.uid);
+        const dataSource = new VehiclesDataSource();
+        const unsubscribeSnapshot = await dataSource.getUserVehicle(user.uid, (vehiclesData) => {
+          setVehicles(vehiclesData);
+          setError(null);
+          setLoading(false);
+        });
+
+        return () => unsubscribeSnapshot(); // Limpiar la suscripción al desmontar el componente
       } else {
         console.error("❌ No user logged in");
         setError("No hay un usuario autenticado.");
@@ -53,7 +46,7 @@ const VehiclesScreen = () => {
       }
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, []);
 
   const handleDeleteVehicle = async (vehicleId: string) => {
@@ -61,11 +54,6 @@ const VehiclesScreen = () => {
       const dataSource = new VehiclesDataSource();
       await dataSource.deleteVehicle(vehicleId);
       Alert.alert("Vehículo eliminado", "El vehículo ha sido eliminado correctamente.");
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (user) {
-        await loadVehicles(user.uid);
-      }
     } catch (error) {
       console.error("Error al eliminar el vehículo:", error);
       Alert.alert("Error", "Hubo un problema al eliminar el vehículo. Inténtalo de nuevo.");
@@ -82,11 +70,6 @@ const VehiclesScreen = () => {
       const dataSource = new VehiclesDataSource();
       await dataSource.updateVehicle(vehicle);
       Alert.alert("Vehículo actualizado", "El vehículo ha sido actualizado correctamente.");
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (user) {
-        await loadVehicles(user.uid);
-      }
     } catch (error) {
       console.error("Error al actualizar el vehículo:", error);
       Alert.alert("Error", "Hubo un problema al actualizar el vehículo. Inténtalo de nuevo.");

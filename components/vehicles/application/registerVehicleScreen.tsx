@@ -48,7 +48,7 @@ const RegisterVehicleScreen = () => {
       });
 
       Alert.alert("Vehículo registrado", "Tu vehículo ha sido registrado correctamente.");
-      router.push("/profile");
+      router.push("/(profile)/vehicles");
     } catch (error) {
       console.error("Error al registrar el vehículo:", error);
       Alert.alert("Error", "Hubo un problema al registrar el vehículo. Inténtalo de nuevo.");
