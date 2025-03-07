@@ -58,7 +58,7 @@ const ParkingScreen = () => {
           setLoading(false);
         }
       } else {
-        console.error("❌ No user logged in");
+        console.error("El usuario no ha iniciado sesión");
         setLoading(false);
       }
     });
@@ -109,8 +109,8 @@ const ParkingScreen = () => {
 
   const getIconByStatus = (status: string) => {
     switch (status) {
-      case "ocupado":
-        return <AntDesign name="closecircle" size={24} color="red" />;
+      // case "ocupado":
+      //   return <AntDesign name="closecircle" size={24} color="red" />;
       case "servicio":
         return (
           <View>

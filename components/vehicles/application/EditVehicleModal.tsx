@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, Modal, TouchableOpacity } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { Vehicle } from "../entities/vehicle";
 
 interface EditVehicleModalProps {
