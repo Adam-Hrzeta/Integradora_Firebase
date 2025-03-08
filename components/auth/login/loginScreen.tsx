@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from "../../lib/firebase";
+import { auth } from "../../../lib/firebase";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -29,7 +29,7 @@ const LoginScreen = () => {
       if (user.emailVerified) {
         // Si el correo está verificado, redirigir al usuario a la pantalla principal
         //Alert.alert("Bienvenido", "Has iniciado sesión."); alerta que notifica
-        router.push("/parkings");
+        router.push("/(profile)/profile");
       } else {
         // Si el correo no está verificado, mostrar un mensaje y cerrar sesión
         Alert.alert(

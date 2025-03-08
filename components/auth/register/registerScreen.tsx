@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
-import { auth } from "../../lib/firebase";
+import { auth } from "../../../lib/firebase";
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState("");
@@ -32,8 +32,8 @@ const RegisterScreen = () => {
 
       Alert.alert("Cuenta creada", "Se ha enviado un correo de verificación. Ahora registra tu vehículo.");
 
-      // Redirigir al formulario de registro de vehículo
-      router.push("/registerVehicle");
+      //una vez se haya registrado se va a redirigir al perfil de usuario
+      router.push("/(profile)/profile");
     } catch (error) {
       Alert.alert("Error", (error as Error).message);
     }
@@ -47,7 +47,7 @@ const RegisterScreen = () => {
     >
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
         <View style={styles.formContainer}>
-          <Text style={styles.title}>Registro</Text>
+          <Text style={styles.title}>Registro de Usuario</Text>
 
           {/* Campo Nombre Completo */}
           <TextInput
@@ -88,7 +88,7 @@ const RegisterScreen = () => {
 
           {/* Botón Registrarse */}
           <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>Registrarse</Text>
+            <Text style={styles.buttonText}>Ingresar</Text>
           </TouchableOpacity>
 
           {/* Botón para iniciar sesión */}

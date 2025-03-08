@@ -101,7 +101,7 @@ const VehiclesScreen = () => {
       blurRadius={10}
     >
       <View style={styles.container}>
-        <Text style={styles.title}>Tus vehículos registrados</Text>
+        <Text style={styles.title}>Mis vehículos registrados</Text>
         {vehicles.length > 0 ? (
           <FlatList
             data={vehicles}

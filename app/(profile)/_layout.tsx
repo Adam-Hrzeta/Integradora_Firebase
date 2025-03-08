@@ -12,31 +12,34 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      // screenOptions={{
+      //   tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      //   headerShown: false,
+      //   tabBarButton: HapticTab,
+      //   tabBarBackground: TabBarBackground,
+      //   tabBarStyle: Platform.select({
+      //     ios: {
+      //       // Use a transparent background on iOS to show the blur effect
+      //       position: 'absolute',
+      //     },
+      //     default: {},
+      //   }),
+      // }}>
+
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          display: 'none', // Oculta la barra de pestañas en todas las pantallas
+        },
       }}>
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Perfil de ususario',
           tabBarIcon: ({ color }) => <Fontisto name="person" size={24} color="black" />,
-        }}
-      />
-      <Tabs.Screen
-        name="vehicles"
-        options={{
-          title: 'Vehiculos registrados',
-          tabBarIcon: ({ color }) => <Fontisto name="car" size={24} color="black" />,
         }}
       />
     </Tabs>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
-import { AntDesign, FontAwesome5, Fontisto } from "@expo/vector-icons";
+import { AntDesign, FontAwesome5, Fontisto, Ionicons } from "@expo/vector-icons";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function Layout() {
@@ -23,7 +23,7 @@ export default function Layout() {
         screenOptions={{
           drawerStyle: {
             width: "60%", // Ajusta el ancho del drawer (puedes usar porcentaje o valores fijos)
-            height: "22%",
+            height: "28%",
           },
         }}
       >
@@ -32,7 +32,7 @@ export default function Layout() {
           name="index" // Ruta de inicio
           options={{
             drawerLabel: "Inicio",
-            title: "Pantalla de bienvenida",
+            title: "Inició de sesión",
             drawerIcon: ({ color, size }) => (
               <AntDesign name="home" size={24} color="black" />
             ),
@@ -43,8 +43,8 @@ export default function Layout() {
         <Drawer.Screen
           name="(profile)" // Ruta de perfil
           options={{
-            drawerLabel: "Perfil de usuario",
-            title: "Perfil de usuario",
+            drawerLabel: "Mi Perfil",
+            title: "Mi Perfil de usuario",
             drawerIcon: ({ color, size }) => (
               <Fontisto name="person" size={24} color="#000000" />
             ),
@@ -61,6 +61,18 @@ export default function Layout() {
             drawerIcon: ({ color, size }) => (
               <FontAwesome5 name="parking" size={24} color="#000000" />
             ),
+            drawerItemStyle: isLoggedIn ? {} : { display: "none" }, // Ocultar si no ha iniciado sesión
+          }}
+        />
+
+         {/* Ruta de vehicles (oculta si el usuario no ha iniciado sesión) */}
+         <Drawer.Screen
+          name="(vehicles)" // Ruta de lotes disponibles
+          options={{
+            drawerLabel: "Mis Vehiculos",
+            title: "Mis Vehiculos",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="car-sport" size={24} color="black" />            ),
             drawerItemStyle: isLoggedIn ? {} : { display: "none" }, // Ocultar si no ha iniciado sesión
           }}
         />
