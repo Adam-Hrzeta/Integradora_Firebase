@@ -31,7 +31,7 @@ const EditVehicleModal: React.FC<EditVehicleModalProps> = ({ visible, onClose, v
     <Modal visible={visible} transparent={true} animationType="slide">
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Editar Vehículo</Text>
+          <Text style={styles.modalTitle}>Actualizar Propiedades</Text>
           <TextInput
             style={styles.input}
             placeholder="Marca"
