@@ -23,7 +23,7 @@ export default function Layout() {
         screenOptions={{
           drawerStyle: {
             width: "60%", // Ajusta el ancho del drawer (puedes usar porcentaje o valores fijos)
-            height: "28%",
+            height: "23%",
           },
         }}
       >
@@ -61,18 +61,6 @@ export default function Layout() {
             drawerIcon: ({ color, size }) => (
               <FontAwesome5 name="parking" size={24} color="#000000" />
             ),
-            drawerItemStyle: isLoggedIn ? {} : { display: "none" }, // Ocultar si no ha iniciado sesión
-          }}
-        />
-
-         {/* Ruta de vehicles (oculta si el usuario no ha iniciado sesión) */}
-         <Drawer.Screen
-          name="(vehicles)" // Ruta de lotes disponibles
-          options={{
-            drawerLabel: "Mis Vehiculos",
-            title: "Mis Vehiculos",
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="car-sport" size={24} color="black" />            ),
             drawerItemStyle: isLoggedIn ? {} : { display: "none" }, // Ocultar si no ha iniciado sesión
           }}
         />

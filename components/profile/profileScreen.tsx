@@ -2,39 +2,55 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   Image,
   StyleSheet,
   Alert,
   ActivityIndicator,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
   ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { auth } from "../../lib/firebase";
-import { updateProfile, updatePassword } from "firebase/auth";
+import { updateProfile, updatePassword, User } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 import PasswordModal from "./NewPasswordModal";
 import NameModal from "./NewNameModal";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { VehiclesDataSource } from "../../components/vehicles/dataSource/vehicles_dataSource";
+import { Vehicle } from "../vehicles/entities/vehicle";
+import VehicleCard from "../../components/vehicles/application/vehicleCard";
+import EditVehicleModal from "../../components/vehicles/application/EditVehicleModal";
+import { LinearGradient } from "expo-linear-gradient";
+import RegisterVehicleModal from "../../components/vehicles/application/registerVehicleModal"; // Importar el modal de registro
 
 const ProfileScreen = () => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(auth.currentUser);
+  const [user, setUser] = useState<User | null>(null);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [nameModalVisible, setNameModalVisible] = useState(false);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [registerModalVisible, setRegisterModalVisible] = useState(false); // Estado para el modal de registro
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
         setEmail(user.email || "");
         setProfileImage(user.photoURL || null);
+
+        const dataSource = new VehiclesDataSource();
+        const unsubscribeSnapshot = await dataSource.getUserVehicle(user.uid, (vehiclesData) => {
+          setVehicles(vehiclesData);
+        });
+
+        return () => unsubscribeSnapshot();
       } else {
         router.push("/");
       }
@@ -43,13 +59,14 @@ const ProfileScreen = () => {
     return () => unsubscribe();
   }, [router]);
 
-  if (!user) {
-    return <Text>Inicie sesión para acceder a su perfil...</Text>;
-  }
-
   const handleUpdatePassword = async (newPassword: string) => {
     if (!newPassword) {
       Alert.alert("Error", "La nueva contraseña no puede estar vacía.");
+      return;
+    }
+
+    if (!user) {
+      Alert.alert("Error", "No hay un usuario autenticado.");
       return;
     }
 
@@ -71,6 +88,11 @@ const ProfileScreen = () => {
   };
 
   const handleUpdateProfileImage = async () => {
+    if (!user) {
+      Alert.alert("Error", "No hay un usuario autenticado.");
+      return;
+    }
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Permiso denegado", "Necesitas permitir el acceso a la galería para cambiar la imagen.");
@@ -104,8 +126,8 @@ const ProfileScreen = () => {
 
   const handleSignOut = async () => {
     try {
-      await auth.signOut(); // Cerrar sesión
-      router.push("/"); // Redirigir al usuario a la pantalla de inicio de sesión
+      await auth.signOut();
+      router.push("/");
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert("Error", error.message);
@@ -116,6 +138,11 @@ const ProfileScreen = () => {
   };
 
   const handleUpdateName = async (newName: string) => {
+    if (!user) {
+      Alert.alert("Error", "No hay un usuario autenticado.");
+      return;
+    }
+
     try {
       setLoading(true);
       await updateProfile(user, { displayName: newName });
@@ -131,65 +158,160 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleDeleteVehicle = async (vehicleId: string) => {
+    try {
+      const dataSource = new VehiclesDataSource();
+      await dataSource.deleteVehicle(vehicleId);
+      Alert.alert("Vehículo eliminado", "El vehículo ha sido eliminado correctamente.");
+      // Actualizar la lista de vehículos
+      if (user) {
+        dataSource.getUserVehicle(user.uid, (vehiclesData) => {
+          setVehicles(vehiclesData);
+        });
+      }
+    } catch (error) {
+      console.error("Error al eliminar el vehículo:", error);
+      Alert.alert("Error", "Hubo un problema al eliminar el vehículo. Inténtalo de nuevo.");
+    }
+  };
+
+  const handleEditVehicle = (vehicle: Vehicle) => {
+    setEditingVehicle(vehicle);
+    setIsModalVisible(true);
+  };
+
+  const handleSaveVehicle = async (vehicle: Vehicle) => {
+    try {
+      const dataSource = new VehiclesDataSource();
+      await dataSource.updateVehicle(vehicle);
+      Alert.alert("Vehículo actualizado", "El vehículo ha sido actualizado correctamente.");
+      // Actualizar la lista de vehículos
+      if (user) {
+        dataSource.getUserVehicle(user.uid, (vehiclesData) => {
+          setVehicles(vehiclesData);
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar el vehículo:", error);
+      Alert.alert("Error", "Hubo un problema al actualizar el vehículo. Inténtalo de nuevo.");
+    }
+  };
+
+  const handleVehicleAdded = () => {
+    // Actualizar la lista de vehículos después de agregar uno nuevo
+    if (user) {
+      const dataSource = new VehiclesDataSource();
+      dataSource.getUserVehicle(user.uid, (vehiclesData) => {
+        setVehicles(vehiclesData);
+      });
+    }
+  };
+
+  if (!user) {
+    return (
+      <View style={styles.center}>
+        <Text>Inicie sesión para acceder a su perfil...</Text>
+      </View>
+    );
+  }
+
   return (
     <ImageBackground
       source={{ uri: "https://static.vecteezy.com/system/resources/previews/025/515/340/original/parking-top-view-garage-floor-with-cars-from-above-city-parking-lot-with-free-space-cartoon-street-carpark-with-various-vehicles-illustration-vector.jpg" }}
       style={styles.background}
       blurRadius={10}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.container}>
-          <View style={styles.formContainer}>
-            <Text style={styles.title}>{user.displayName || "Sin nombre"}</Text>
+      <FlatList
+        data={vehicles}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={
+          <View style={styles.container}>
+            {/* Profile Section */}
+            <View style={styles.horizontalContainer}>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={profileImage ? { uri: profileImage } : require("../../assets/images/defaultProfile.png")}
+                  style={styles.profileImage}
+                />
+                <TouchableOpacity style={styles.editIcon} onPress={handleUpdateProfileImage}>
+                  <Ionicons name="camera" size={24} color="#FFF" />
+                </TouchableOpacity>
+              </View>
 
-            {/* Imagen de perfil */}
-            <View style={styles.imageContainer}>
-              <Image
-                source={profileImage ? { uri: profileImage } : require("../../assets/images/defaultProfile.png")}
-                style={styles.profileImage}
-              />
-              <TouchableOpacity style={styles.editIcon} onPress={handleUpdateProfileImage}>
-                <Ionicons name="camera" size={24} color="#FFF" />
-              </TouchableOpacity>
+              <View style={styles.infoContainer}>
+                <View style={styles.nameContainer}>
+                  <Text style={styles.title}>{user.displayName || "Sin nombre"}</Text>
+                  <TouchableOpacity style={styles.editName} onPress={() => setNameModalVisible(true)}>
+                    <MaterialIcons name="drive-file-rename-outline" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.label}>Correo electrónico:</Text>
+                <Text style={styles.emailText}>{email}</Text>
+
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity style={styles.button} onPress={() => setPasswordModalVisible(true)}>
+                    <Text style={styles.buttonText}>Cambiar Contraseña</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+                    <Text style={styles.signOutButtonText}>Cerrar Sesión</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
 
-            {/* Nombre del usuario */}
-            <TouchableOpacity style={styles.editName} onPress={() => setNameModalVisible(true)}>
-              <MaterialIcons name="drive-file-rename-outline" size={24} color="white" />
-            </TouchableOpacity>
-
-            {/* Correo electrónico */}
-            <Text style={styles.label}>Correo electrónico:</Text>
-            <Text style={styles.emailText}>{email}</Text>
-
-            {/* Botones para editar correo y contraseña */}
-            <View>
-              <TouchableOpacity style={styles.button} onPress={() => setPasswordModalVisible(true)}>
-                <Text style={styles.buttonText}>Cambiar Contraseña</Text>
-              </TouchableOpacity>
-            </View>
-
-             {/* Botón para cerrar sesión */}
-          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-            <Text style={styles.signOutButtonText}>Cerrar Sesión</Text>
-          </TouchableOpacity>
-
-            {loading && <ActivityIndicator size="large" color="#7E57C2" />}
+            <Text style={styles.vehiclesTitle}>Mis vehículos registrados</Text>
           </View>
+        }
+        renderItem={({ item }) => (
+          <VehicleCard
+            vehicle={item}
+            onDelete={handleDeleteVehicle}
+            onEdit={handleEditVehicle}
+          />
+        )}
+        ListEmptyComponent={
+          <Text style={styles.noVehiclesText}>No tienes vehículos registrados.</Text>
+        }
+        contentContainerStyle={styles.listContent}
+      />
 
-          <PasswordModal
-            visible={passwordModalVisible}
-            onClose={() => setPasswordModalVisible(false)}
-            onUpdatePassword={handleUpdatePassword}
-          />
-          <NameModal
-            visible={nameModalVisible}
-            onClose={() => setNameModalVisible(false)}
-            onUpdateName={handleUpdateName}
-            currentName={user.displayName || ""}
-          />
-        </View>
-      </ScrollView>
+      {/* Add Vehicle Button */}
+      <View style={styles.addButtonContainer}>
+        <TouchableOpacity style={styles.addButton} onPress={() => setRegisterModalVisible(true)}>
+          <Text style={styles.addButtonText}>Agregar Vehículo</Text>
+        </TouchableOpacity>
+      </View>
+
+      {loading && <ActivityIndicator size="large" color="#7E57C2" />}
+
+      {/* Modals */}
+      <PasswordModal
+        visible={passwordModalVisible}
+        onClose={() => setPasswordModalVisible(false)}
+        onUpdatePassword={handleUpdatePassword}
+      />
+      <NameModal
+        visible={nameModalVisible}
+        onClose={() => setNameModalVisible(false)}
+        onUpdateName={handleUpdateName}
+        currentName={user.displayName || ""}
+      />
+      {editingVehicle && (
+        <EditVehicleModal
+          visible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+          vehicle={editingVehicle}
+          onSave={handleSaveVehicle}
+        />
+      )}
+
+      {/* Modal de Registro de Vehículo */}
+      <RegisterVehicleModal
+        visible={registerModalVisible}
+        onClose={() => setRegisterModalVisible(false)}
+        onVehicleAdded={handleVehicleAdded}
+      />
     </ImageBackground>
   );
 };
@@ -200,40 +322,29 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
-    padding: 20,
+    padding: 10,
   },
-  formContainer: {
-    width: "80%",
+  horizontalContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
     backgroundColor: "rgba(46, 39, 57, 0.8)",
-    padding: 25,
-    borderRadius: 15,
+    padding: 10,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#FFF",
-    marginBottom: 20,
-  },
   imageContainer: {
+    marginRight: 20,
     position: "relative",
-    alignSelf: "center",
-    marginBottom: 20,
   },
   profileImage: {
     width: 120,
     height: 120,
-    borderRadius: 60,
+    borderRadius: 10,
   },
   editIcon: {
     position: "absolute",
@@ -243,13 +354,26 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 5,
   },
+  infoContainer: {
+    flex: 1,
+  },
+  nameContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginRight: 10,
+  },
   editName: {
-    position: "absolute",
-    bottom: 380,
-    right: 40,
     backgroundColor: "#7E57C2",
     borderRadius: 15,
     padding: 4,
+    right: 50,
+    marginBottom: 40,
   },
   label: {
     fontSize: 16,
@@ -260,6 +384,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#B39DDB",
     marginBottom: 20,
+  },
+  buttonContainer: {
+    width: "100%",
   },
   button: {
     backgroundColor: "#7E57C2",
@@ -274,7 +401,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   signOutButton: {
-    backgroundColor: "#FF3B30", // Color rojo para el botón de cerrar sesión
+    backgroundColor: "#FF3B30",
     borderRadius: 25,
     paddingVertical: 12,
     alignItems: "center",
@@ -284,6 +411,47 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  vehiclesTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginTop: 20,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  noVehiclesText: {
+    fontSize: 18,
+    color: "#FFF",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  addButtonContainer: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+    alignItems: "center",
+  },
+  addButton: {
+    backgroundColor: "#6C63FF",
+    borderRadius: 25,
+    paddingVertical: 12,
+    alignItems: "center",
+    width: "100%",
+  },
+  addButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  listContent: {
+    paddingBottom: 80,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

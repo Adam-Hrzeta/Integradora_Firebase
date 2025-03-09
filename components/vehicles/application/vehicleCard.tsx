@@ -62,8 +62,10 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onDelete, onEdit }) 
 
 const styles = StyleSheet.create({
   vehicleItem: {
-    padding: 20,
-    marginBottom: 15,
+    padding: 10,
+    marginBottom: 5,
+    marginLeft: 15,
+    marginRight: 15,
     backgroundColor: "#fff",
     borderRadius: 16,
     borderWidth: 1,
@@ -78,7 +80,7 @@ const styles = StyleSheet.create({
   vehicleInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 7,
   },
   vehicleText: {
     fontSize: 18,
