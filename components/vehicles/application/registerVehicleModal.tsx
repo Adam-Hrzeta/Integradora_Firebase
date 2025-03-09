@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "80%",
-    backgroundColor: "rgba(46, 39, 57, 0.9)",
+    backgroundColor: "rgb(46, 39, 57)",
     padding: 25,
     borderRadius: 15,
     borderWidth: 1,
@@ -182,7 +182,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 5,
     marginBottom: 20,
-    overflow: "hidden",
   },
   button: {
     backgroundColor: "#7E57C2",

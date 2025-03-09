@@ -22,7 +22,7 @@ import { Vehicle } from "../vehicles/entities/vehicle";
 import VehicleCard from "../../components/vehicles/application/vehicleCard";
 import EditVehicleModal from "../../components/vehicles/application/EditVehicleModal";
 import { LinearGradient } from "expo-linear-gradient";
-import RegisterVehicleModal from "../../components/vehicles/application/registerVehicleModal"; // Importar el modal de registro
+import RegisterVehicleModal from "../../components/vehicles/application/registerVehicleModal";
 
 const ProfileScreen = () => {
   const [email, setEmail] = useState("");
@@ -35,7 +35,7 @@ const ProfileScreen = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [registerModalVisible, setRegisterModalVisible] = useState(false); // Estado para el modal de registro
+  const [registerModalVisible, setRegisterModalVisible] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -163,7 +163,6 @@ const ProfileScreen = () => {
       const dataSource = new VehiclesDataSource();
       await dataSource.deleteVehicle(vehicleId);
       Alert.alert("Vehículo eliminado", "El vehículo ha sido eliminado correctamente.");
-      // Actualizar la lista de vehículos
       if (user) {
         dataSource.getUserVehicle(user.uid, (vehiclesData) => {
           setVehicles(vehiclesData);
@@ -185,7 +184,6 @@ const ProfileScreen = () => {
       const dataSource = new VehiclesDataSource();
       await dataSource.updateVehicle(vehicle);
       Alert.alert("Vehículo actualizado", "El vehículo ha sido actualizado correctamente.");
-      // Actualizar la lista de vehículos
       if (user) {
         dataSource.getUserVehicle(user.uid, (vehiclesData) => {
           setVehicles(vehiclesData);
@@ -198,7 +196,6 @@ const ProfileScreen = () => {
   };
 
   const handleVehicleAdded = () => {
-    // Actualizar la lista de vehículos después de agregar uno nuevo
     if (user) {
       const dataSource = new VehiclesDataSource();
       dataSource.getUserVehicle(user.uid, (vehiclesData) => {
@@ -236,6 +233,12 @@ const ProfileScreen = () => {
                 <TouchableOpacity style={styles.editIcon} onPress={handleUpdateProfileImage}>
                   <Ionicons name="camera" size={24} color="#FFF" />
                 </TouchableOpacity>
+
+                {/* Botón de Cerrar Sesión */}
+                <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+                  <Ionicons name="log-out" size={20} color="#FFF" />
+                  <Text style={styles.signOutText}>Cerrar sesión</Text>
+                </TouchableOpacity>
               </View>
 
               <View style={styles.infoContainer}>
@@ -249,18 +252,21 @@ const ProfileScreen = () => {
                 <Text style={styles.label}>Correo electrónico:</Text>
                 <Text style={styles.emailText}>{email}</Text>
 
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity style={styles.button} onPress={() => setPasswordModalVisible(true)}>
-                    <Text style={styles.buttonText}>Cambiar Contraseña</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-                    <Text style={styles.signOutButtonText}>Cerrar Sesión</Text>
-                  </TouchableOpacity>
-                </View>
+                {/* Botón de Cambiar Contraseña */}
+                <TouchableOpacity style={styles.changePasswordButton} onPress={() => setPasswordModalVisible(true)}>
+                  <Ionicons name="key" size={16} color="#FFF" />
+                  <Text style={styles.changePasswordText}>Cambiar contraseña</Text>
+                </TouchableOpacity>
               </View>
             </View>
 
-            <Text style={styles.vehiclesTitle}>Mis vehículos registrados</Text>
+            {/* Título y Botón de Agregar Vehículo */}
+            <View style={styles.vehiclesHeader}>
+              <Text style={styles.vehiclesTitle}>Mis vehículos registrados</Text>
+              <TouchableOpacity style={styles.addButton} onPress={() => setRegisterModalVisible(true)}>
+                <Ionicons name="add" size={24} color="#FFF" />
+              </TouchableOpacity>
+            </View>
           </View>
         }
         renderItem={({ item }) => (
@@ -275,13 +281,6 @@ const ProfileScreen = () => {
         }
         contentContainerStyle={styles.listContent}
       />
-
-      {/* Add Vehicle Button */}
-      <View style={styles.addButtonContainer}>
-        <TouchableOpacity style={styles.addButton} onPress={() => setRegisterModalVisible(true)}>
-          <Text style={styles.addButtonText}>Agregar Vehículo</Text>
-        </TouchableOpacity>
-      </View>
 
       {loading && <ActivityIndicator size="large" color="#7E57C2" />}
 
@@ -354,6 +353,24 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 5,
   },
+  signOutButton: {
+    position: "absolute",
+    bottom: -40,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FF3B30",
+    borderRadius: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  signOutText: {
+    color: "#FFF",
+    fontSize: 12,
+  },
   infoContainer: {
     flex: 1,
   },
@@ -376,74 +393,53 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#FFF",
-    marginBottom: 5,
+    marginBottom: 2,
   },
   emailText: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#B39DDB",
-    marginBottom: 20,
+    marginBottom: 5,
   },
-  buttonContainer: {
-    width: "100%",
-  },
-  button: {
+  changePasswordButton: {
     backgroundColor: "#7E57C2",
-    borderRadius: 25,
-    paddingVertical: 12,
+    borderRadius: 8,
+    paddingVertical: 5,
+    marginRight: 25,
+    marginLeft:25,
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 15,
+    justifyContent: "center",
+    gap: 5,
   },
-  buttonText: {
+  changePasswordText: {
     color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 12,
   },
-  signOutButton: {
-    backgroundColor: "#FF3B30",
-    borderRadius: 25,
-    paddingVertical: 12,
+  vehiclesHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 15,
-  },
-  signOutButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 20,
+    marginBottom: 10,
   },
   vehiclesTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#FFF",
-    marginTop: 20,
-    marginBottom: 10,
-    textAlign: "center",
+  },
+  addButton: {
+    backgroundColor: "#6C63FF",
+    borderRadius: 25,
+    padding: 10,
   },
   noVehiclesText: {
     fontSize: 18,
     color: "#FFF",
     textAlign: "center",
     marginTop: 20,
-  },
-  addButtonContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-    alignItems: "center",
-  },
-  addButton: {
-    backgroundColor: "#6C63FF",
-    borderRadius: 25,
-    paddingVertical: 12,
-    alignItems: "center",
-    width: "100%",
-  },
-  addButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
   },
   listContent: {
     paddingBottom: 80,
