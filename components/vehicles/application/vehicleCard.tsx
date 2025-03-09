@@ -39,22 +39,26 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onDelete, onEdit }) 
         </LinearGradient>
       </TouchableOpacity>
 
-      {/* Información del vehículo */}
-      <View style={styles.vehicleInfo}>
-        <MaterialIcons name="directions-car" size={28} color="#6C63FF" />
-        <Text style={styles.vehicleText}>Marca: {vehicle.brand}</Text>
+      {/* Información del vehículo en dos filas de dos campos */}
+      <View style={styles.row}>
+        <View style={styles.vehicleInfo}>
+          <MaterialIcons name="directions-car" size={24} color="#6C63FF" />
+          <Text style={styles.vehicleText}>Marca: {vehicle.brand}</Text>
+        </View>
+        <View style={styles.vehicleInfo}>
+          <MaterialIcons name="confirmation-number" size={24} color="#6C63FF" />
+          <Text style={styles.vehicleText}>Placa: {vehicle.licence}</Text>
+        </View>
       </View>
-      <View style={styles.vehicleInfo}>
-        <MaterialIcons name="confirmation-number" size={28} color="#6C63FF" />
-        <Text style={styles.vehicleText}>Placa: {vehicle.licence}</Text>
-      </View>
-      <View style={styles.vehicleInfo}>
-        <MaterialIcons name="build" size={28} color="#6C63FF" />
-        <Text style={styles.vehicleText}>Modelo: {vehicle.model}</Text>
-      </View>
-      <View style={styles.vehicleInfo}>
-        <MaterialIcons name="calendar-today" size={28} color="#6C63FF" />
-        <Text style={styles.vehicleText}>Año: {vehicle.year}</Text>
+      <View style={styles.row}>
+        <View style={styles.vehicleInfo}>
+          <MaterialIcons name="build" size={24} color="#6C63FF" />
+          <Text style={styles.vehicleText}>Modelo: {vehicle.model}</Text>
+        </View>
+        <View style={styles.vehicleInfo}>
+          <MaterialIcons name="calendar-today" size={24} color="#6C63FF" />
+          <Text style={styles.vehicleText}>Año: {vehicle.year}</Text>
+        </View>
       </View>
     </View>
   );
@@ -62,14 +66,13 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onDelete, onEdit }) 
 
 const styles = StyleSheet.create({
   vehicleItem: {
-    padding: 10,
+    padding: 16, // Padding interno
     marginBottom: 10,
-    marginLeft: 15,
-    marginRight: 15,
-    backgroundColor: "#fff",
+    marginHorizontal: 15, // Margen horizontal
+    backgroundColor: "rgba(46, 39, 57, 0.8)", // Color del contenedor del perfil
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: "rgba(255, 255, 255, 0.2)", // Borde sutil
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -77,32 +80,38 @@ const styles = StyleSheet.create({
     elevation: 5,
     position: "relative",
   },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10, 
+  },
   vehicleInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 7,
+    flex: 1, 
+    marginRight: 10, 
   },
   vehicleText: {
-    fontSize: 18,
-    color: "#444",
-    marginLeft: 15,
-    fontWeight: "600",
+    fontSize: 16,
+    color: "#FFF", 
+    marginLeft: 8, 
+    fontWeight: "500",
   },
   deleteButton: {
     position: "absolute",
-    top: 10,
+    top: 60,
     right: 10,
     width: 40,
-    height: 40,
-    borderRadius: 20,
+    height: 30,
+    borderRadius: 30,
     overflow: "hidden",
   },
   editButton: {
     position: "absolute",
-    top: 10,
-    right: 60, // Ajusta la posición para que no se superponga con el botón de eliminar
-    width: 40,
-    height: 40,
+    top: -7,
+    right: -5, 
+    width: 30,
+    height: 30,
     borderRadius: 20,
     overflow: "hidden",
   },
