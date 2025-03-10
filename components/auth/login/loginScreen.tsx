@@ -13,30 +13,27 @@ import {
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "../../../lib/firebase";
+import { Ionicons } from "@expo/vector-icons"; // Importar el icono
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
   const router = useRouter();
 
   const handleLogin = async () => {
     try {
-      // Iniciar sesión con correo y contraseña
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Verificar si el correo electrónico está confirmado
       if (user.emailVerified) {
-        // Si el correo está verificado, redirigir al usuario a la pantalla principal
-        //Alert.alert("Bienvenido", "Has iniciado sesión."); alerta que notifica
         router.push("/(profile)/profile");
       } else {
-        // Si el correo no está verificado, mostrar un mensaje y cerrar sesión
         Alert.alert(
           "Correo no verificado",
           "Por favor, verifica tu correo electrónico antes de iniciar sesión."
         );
-        await signOut(auth); // Cerrar sesión para evitar acceso no autorizado
+        await signOut(auth);
       }
     } catch (error) {
       const errorMessage = (error as Error).message;
@@ -70,15 +67,27 @@ const LoginScreen = () => {
             placeholderTextColor="#B39DDB"
           />
 
-          {/* Campo Contraseña */}
-          <TextInput
-            style={styles.input}
-            placeholder="Contraseña"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#B39DDB"
-          />
+          {/* Campo Contraseña con icono de ojo */}
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Contraseña"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword} // Alternar entre texto seguro y no seguro
+              placeholderTextColor="#B39DDB"
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)} // Alternar la visibilidad
+            >
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"} // Cambiar el icono según el estado
+                size={24}
+                color="#B39DDB"
+              />
+            </TouchableOpacity>
+          </View>
 
           {/* Botón Iniciar Sesión */}
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -134,12 +143,28 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     color: "#FFF",
   },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomColor: "#7E57C2",
+    borderBottomWidth: 1,
+    marginBottom: 20,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 40,
+    paddingLeft: 8,
+    color: "#FFF",
+  },
+  eyeIcon: {
+    padding: 10,
+  },
   button: {
     backgroundColor: "#7E57C2",
     paddingVertical: 12,
-    borderRadius: 25, // Bordes más redondeados
+    borderRadius: 25,
     alignItems: "center",
-    marginBottom: 15, // Espacio entre botones
+    marginBottom: 15,
   },
   buttonText: {
     color: "#FFF",
@@ -147,10 +172,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   registerButton: {
-    alignItems: "center", // Centrar el texto
+    alignItems: "center",
   },
   registerButtonText: {
-    color: "#7E57C2", // Texto morado
+    color: "#7E57C2",
     fontSize: 14,
     fontWeight: "bold",
   },

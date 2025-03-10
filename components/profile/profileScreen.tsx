@@ -388,8 +388,8 @@ const styles = StyleSheet.create({
   editName: {
     backgroundColor: "#7E57C2",
     borderRadius: 15,
-    padding: 4,
-    right: 50,
+    padding: 3,
+    right: -10,
     marginBottom: 40,
   },
   label: {

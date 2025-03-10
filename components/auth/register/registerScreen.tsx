@@ -13,15 +13,26 @@ import {
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { auth } from "../../../lib/firebase";
+import { Ionicons } from "@expo/vector-icons"; // Importar el icono
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // Estado para confirmar contraseña
   const [displayName, setDisplayName] = useState("");
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Estado para mostrar/ocultar confirmación de contraseña
+  const [passwordError, setPasswordError] = useState(""); // Estado para mensaje de error
   const router = useRouter();
 
   const handleRegister = async () => {
+    // Verificar que las contraseñas coincidan
+    if (password !== confirmPassword) {
+      setPasswordError("Las contraseñas no coinciden.");
+      return;
+    }
+
     try {
       // Registrar usuario
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -32,7 +43,7 @@ const RegisterScreen = () => {
 
       Alert.alert("Cuenta creada", "Se ha enviado un correo de verificación. Ahora registra tu vehículo.");
 
-      //una vez se haya registrado se va a redirigir al perfil de usuario
+      // Redirigir al perfil de usuario
       router.push("/(profile)/profile");
     } catch (error) {
       Alert.alert("Error", (error as Error).message);
@@ -74,21 +85,66 @@ const RegisterScreen = () => {
             onBlur={() => setFocusedInput(null)}
           />
 
-          {/* Campo Contraseña */}
-          <TextInput
-            style={[styles.input, focusedInput === "password" && styles.inputFocused]}
-            placeholder="Contraseña"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#B39DDB"
-            onFocus={() => setFocusedInput("password")}
-            onBlur={() => setFocusedInput(null)}
-          />
+          {/* Campo Contraseña con icono de ojo */}
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Contraseña"
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                setPasswordError(""); // Limpiar el mensaje de error al cambiar el texto
+              }}
+              secureTextEntry={!showPassword} // Alternar entre texto seguro y no seguro
+              placeholderTextColor="#B39DDB"
+              onFocus={() => setFocusedInput("password")}
+              onBlur={() => setFocusedInput(null)}
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)} // Alternar la visibilidad
+            >
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"} // Cambiar el icono según el estado
+                size={24}
+                color="#B39DDB"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Campo Confirmar Contraseña con icono de ojo */}
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Confirmar contraseña"
+              value={confirmPassword}
+              onChangeText={(text) => {
+                setConfirmPassword(text);
+                setPasswordError(""); // Limpiar el mensaje de error al cambiar el texto
+              }}
+              secureTextEntry={!showConfirmPassword} // Alternar entre texto seguro y no seguro
+              placeholderTextColor="#B39DDB"
+              onFocus={() => setFocusedInput("confirmPassword")}
+              onBlur={() => setFocusedInput(null)}
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)} // Alternar la visibilidad
+            >
+              <Ionicons
+                name={showConfirmPassword ? "eye-off" : "eye"} // Cambiar el icono según el estado
+                size={24}
+                color="#B39DDB"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Mensaje de error si las contraseñas no coinciden */}
+          {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
           {/* Botón Registrarse */}
           <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>Ingresar</Text>
+            <Text style={styles.buttonText}>Registrarse</Text>
           </TouchableOpacity>
 
           {/* Botón para iniciar sesión */}
@@ -138,6 +194,22 @@ const styles = StyleSheet.create({
   inputFocused: {
     borderBottomColor: "#B39DDB", // Cambia el color del borde cuando está enfocado
   },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomColor: "#7E57C2",
+    borderBottomWidth: 1,
+    marginBottom: 20,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 40,
+    paddingLeft: 8,
+    color: "#FFF",
+  },
+  eyeIcon: {
+    padding: 10,
+  },
   button: {
     backgroundColor: "#7E57C2",
     paddingVertical: 12,
@@ -157,6 +229,12 @@ const styles = StyleSheet.create({
     color: "#7E57C2",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "#FF6F61", // Color rojo para el mensaje de error
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: "center",
   },
 });
 
