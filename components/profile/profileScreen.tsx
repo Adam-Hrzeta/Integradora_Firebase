@@ -7,7 +7,7 @@ import {
   Alert,
   ActivityIndicator,
   TouchableOpacity,
-  FlatList,
+  ScrollView,
   ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -21,7 +21,6 @@ import { VehiclesDataSource } from "../../components/vehicles/dataSource/vehicle
 import { Vehicle } from "../vehicles/entities/vehicle";
 import VehicleCard from "../../components/vehicles/application/vehicleCard";
 import EditVehicleModal from "../../components/vehicles/application/EditVehicleModal";
-import { LinearGradient } from "expo-linear-gradient";
 import RegisterVehicleModal from "../../components/vehicles/application/registerVehicleModal";
 
 const ProfileScreen = () => {
@@ -218,71 +217,70 @@ const ProfileScreen = () => {
       style={styles.background}
       blurRadius={10}
     >
-      <FlatList
-        data={vehicles}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <View style={styles.container}>
-            {/* Profile Section */}
-            <View style={styles.horizontalContainer}>
-              <View style={styles.imageContainer}>
-                <Image
-                  source={profileImage ? { uri: profileImage } : require("../../assets/images/defaultProfile.png")}
-                  style={styles.profileImage}
-                />
-                <TouchableOpacity style={styles.editIcon} onPress={handleUpdateProfileImage}>
-                  <Ionicons name="camera" size={24} color="#FFF" />
-                </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Profile Section */}
+        <View style={styles.profileContainer}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={profileImage ? { uri: profileImage } : require("../../assets/images/defaultProfile.png")}
+              style={styles.profileImage}
+            />
+            <TouchableOpacity style={styles.editIcon} onPress={handleUpdateProfileImage}>
+              <Ionicons name="camera" size={24} color="#FFF" />
+            </TouchableOpacity>
 
-                {/* Botón de Cerrar Sesión */}
-                <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-                  <Ionicons name="log-out" size={20} color="#FFF" />
-                  <Text style={styles.signOutText}>Cerrar sesión</Text>
-                </TouchableOpacity>
-              </View>
+            {/* Botón de Cerrar Sesión */}
+            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+              <Ionicons name="log-out" size={20} color="#FFF" />
+              <Text style={styles.signOutText}>Cerrar sesión</Text>
+            </TouchableOpacity>
+          </View>
 
-              <View style={styles.infoContainer}>
-                <View style={styles.nameContainer}>
-                  <Text style={styles.title}>{user.displayName || "Sin nombre"}</Text>
-                  <TouchableOpacity style={styles.editName} onPress={() => setNameModalVisible(true)}>
-                    <MaterialIcons name="drive-file-rename-outline" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-
-                <Text style={styles.label}>Correo electrónico:</Text>
-                <Text style={styles.emailText}>{email}</Text>
-
-                {/* Botón de Cambiar Contraseña */}
-                <TouchableOpacity style={styles.changePasswordButton} onPress={() => setPasswordModalVisible(true)}>
-                  <Ionicons name="key" size={16} color="#FFF" />
-                  <Text style={styles.changePasswordText}>Cambiar contraseña</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Título y Botón de Agregar Vehículo */}
-            <View style={styles.vehiclesHeader}>
-              <Text style={styles.vehiclesTitle}>Mis vehículos registrados</Text>
-              <TouchableOpacity style={styles.addButton} onPress={() => setRegisterModalVisible(true)}>
-                <Ionicons name="add" size={24} color="#FFF" />
+          <View style={styles.infoContainer}>
+            <View style={styles.nameContainer}>
+              <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+                {user.displayName || "Sin nombre"}
+              </Text>
+              <TouchableOpacity style={styles.editName} onPress={() => setNameModalVisible(true)}>
+                <MaterialIcons name="drive-file-rename-outline" size={24} color="white" />
               </TouchableOpacity>
             </View>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <VehicleCard
-            vehicle={item}
-            onDelete={handleDeleteVehicle}
-            onEdit={handleEditVehicle}
-          />
-        )}
-        ListEmptyComponent={
-          <Text style={styles.noVehiclesText}>No tienes vehículos registrados.</Text>
-        }
-        contentContainerStyle={styles.listContent}
-      />
 
-      {loading && <ActivityIndicator size="large" color="#7E57C2" />}
+            <Text style={styles.label}>Correo electrónico:</Text>
+            <Text style={styles.emailText} numberOfLines={1} ellipsizeMode="tail">
+              {email}
+            </Text>
+
+            <TouchableOpacity style={styles.changePasswordButton} onPress={() => setPasswordModalVisible(true)}>
+              <Ionicons name="key" size={16} color="#FFF" />
+              <Text style={styles.changePasswordText}>Cambiar contraseña</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Vehicles Section */}
+        <View style={styles.vehiclesContainer}>
+          <View style={styles.vehiclesHeader}>
+            <Text style={styles.vehiclesTitle}>Mis vehículos registrados</Text>
+            <TouchableOpacity style={styles.addButton} onPress={() => setRegisterModalVisible(true)}>
+              <Ionicons name="add" size={24} color="#FFF" />
+            </TouchableOpacity>
+          </View>
+
+          {vehicles.length > 0 ? (
+            vehicles.map((vehicle) => (
+              <VehicleCard
+                key={vehicle.id}
+                vehicle={vehicle}
+                onDelete={handleDeleteVehicle}
+                onEdit={handleEditVehicle}
+              />
+            ))
+          ) : (
+            <Text style={styles.noVehiclesText}>No tienes vehículos registrados.</Text>
+          )}
+        </View>
+      </ScrollView>
 
       {/* Modals */}
       <PasswordModal
@@ -304,13 +302,13 @@ const ProfileScreen = () => {
           onSave={handleSaveVehicle}
         />
       )}
-
-      {/* Modal de Registro de Vehículo */}
       <RegisterVehicleModal
         visible={registerModalVisible}
         onClose={() => setRegisterModalVisible(false)}
         onVehicleAdded={handleVehicleAdded}
       />
+
+      {loading && <ActivityIndicator size="large" color="#7E57C2" style={styles.loadingIndicator} />}
     </ImageBackground>
   );
 };
@@ -319,30 +317,27 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: "cover",
-    justifyContent: "center",
   },
-  container: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 10,
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 20,
   },
-  horizontalContainer: {
+  profileContainer: {
     flexDirection: "row",
     alignItems: "flex-start",
     backgroundColor: "rgba(46, 39, 57, 0.8)",
-    padding: 10,
+    padding: 15,
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    marginBottom: 20,
   },
   imageContainer: {
-    marginRight: 20,
+    marginRight: 15,
     position: "relative",
+    alignItems: "center",
   },
   profileImage: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
     borderRadius: 10,
   },
   editIcon: {
@@ -354,18 +349,15 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   signOutButton: {
-    position: "absolute",
-    bottom: -40,
-    left: 0,
-    right: 0,
-    backgroundColor: "#FF3B30",
-    borderRadius: 10,
-    paddingVertical: 4,
+    backgroundColor: "#BF360C",
+    borderRadius: 8,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 5,
+    marginTop: 10,
   },
   signOutText: {
     color: "#FFF",
@@ -380,17 +372,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#FFF",
-    marginRight: 10,
+    flexShrink: 1,
   },
   editName: {
     backgroundColor: "#7E57C2",
     borderRadius: 15,
-    padding: 3,
-    right: -10,
-    marginBottom: 40,
+    padding: 5,
+    marginLeft: 10,
   },
   label: {
     fontSize: 14,
@@ -400,33 +391,37 @@ const styles = StyleSheet.create({
   emailText: {
     fontSize: 14,
     color: "#B39DDB",
-    marginBottom: 5,
+    marginBottom: 10,
+    flexShrink: 1,
   },
   changePasswordButton: {
     backgroundColor: "#7E57C2",
     borderRadius: 8,
-    paddingVertical: 5,
-    marginRight: 25,
-    marginLeft:25,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
+    marginBottom: 10,
   },
   changePasswordText: {
     color: "#FFF",
     fontSize: 12,
   },
+  vehiclesContainer: {
+    backgroundColor: "rgba(46, 39, 57, 0.8)",
+    padding: 15,
+    borderRadius: 10,
+  },
   vehiclesHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    width: "100%",
-    marginTop: 20,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   vehiclesTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#FFF",
   },
@@ -436,13 +431,15 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   noVehiclesText: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#FFF",
     textAlign: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
-  listContent: {
-    paddingBottom: 80,
+  loadingIndicator: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
   },
   center: {
     flex: 1,
