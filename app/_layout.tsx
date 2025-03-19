@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
-import { AntDesign, FontAwesome5, Fontisto, Ionicons } from "@expo/vector-icons";
+import { AntDesign, FontAwesome5, Fontisto, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function Layout() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado para verificar si el usuario ha iniciado sesión
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const auth = getAuth();
 
   useEffect(() => {
@@ -22,14 +22,13 @@ export default function Layout() {
       <Drawer
         screenOptions={{
           drawerStyle: {
-            width: "60%", // Ajusta el ancho del drawer (puedes usar porcentaje o valores fijos)
+            width: "60%",
             height: "23%",
           },
         }}
       >
-        {/* Ruta de inicio (siempre visible) */}
         <Drawer.Screen
-          name="index" // Ruta de inicio
+          name="index"
           options={{
             drawerLabel: "Inicio",
             title: "Inició de sesión",
@@ -39,38 +38,47 @@ export default function Layout() {
           }}
         />
 
-        {/* Ruta de perfil (oculta si el usuario no ha iniciado sesión) */}
         <Drawer.Screen
-          name="(profile)" // Ruta de perfil
+          name="(profile)"
           options={{
             drawerLabel: "Mi Perfil",
             title: "Mi Perfil de usuario",
             drawerIcon: ({ color, size }) => (
               <Fontisto name="person" size={24} color="#000000" />
             ),
-            drawerItemStyle: isLoggedIn ? {} : { display: "none" }, // Ocultar si no ha iniciado sesión
+            drawerItemStyle: isLoggedIn ? {} : { display: "none" },
           }}
         />
 
-        {/* Ruta de lotes disponibles (oculta si el usuario no ha iniciado sesión) */}
         <Drawer.Screen
-          name="(parkings)" // Ruta de lotes disponibles
+          name="(parkings)"
           options={{
             drawerLabel: "Lotes disponibles",
             title: "Lotes disponibles",
             drawerIcon: ({ color, size }) => (
               <FontAwesome5 name="parking" size={24} color="#000000" />
             ),
-            drawerItemStyle: isLoggedIn ? {} : { display: "none" }, // Ocultar si no ha iniciado sesión
+            drawerItemStyle: isLoggedIn ? {} : { display: "none" },
           }}
         />
 
-        {/* Ocultar rutas no deseadas, como (auth) */}
+        <Drawer.Screen
+          name="(messages)"
+          options={{
+            drawerLabel: "Mensajes",
+            title: "Mensajes",
+            drawerIcon: ({ color, size }) => (
+              <MaterialIcons name="message" size={24} color="#000000" />
+            ),
+            drawerItemStyle: isLoggedIn ? {} : { display: "none" },
+          }}
+        />
+
         <Drawer.Screen
           name="(auth)"
           options={{
             title: "Credenciales de usuario",
-            drawerItemStyle: { display: "none" }, // Oculta esta ruta en el drawer
+            drawerItemStyle: { display: "none" },
           }}
         />
       </Drawer>

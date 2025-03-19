@@ -12,7 +12,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
-import { auth } from "../../../lib/firebase";
+import { auth, db } from "../../../lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons"; // Importar el icono
 
 const RegisterScreen = () => {
@@ -37,6 +38,14 @@ const RegisterScreen = () => {
       // Registrar usuario
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName });
+
+      // Guardar información adicional en Firestore
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        email: email,
+        displayName: displayName,
+        role: "user", // Asignar rol de usuario
+        createdAt: new Date(),
+      });
 
       // Enviar correo de verificación
       await sendEmailVerification(userCredential.user);
