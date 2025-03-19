@@ -62,9 +62,11 @@ export class ParkingDataSource {
         const unsubscribe = onSnapshot(collection(db, "parkings"), (snapshot) => {
             // Mapea cada documento a un objeto `Parking`.
             const updatedParkings = snapshot.docs.map((doc) => {
-                const docData = doc.data() as Parking;
+                const docData = doc.data();
                 return {
-                    ...docData, // Usa el spread operator para incluir todas las propiedades del documento.
+                    id: doc.id,
+                    label: docData.label,
+                    status: docData.status,
                 };
             });
             callback(updatedParkings); // Ejecuta el callback con los estacionamientos actualizados.

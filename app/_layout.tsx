@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
 import { AntDesign, FontAwesome5, Fontisto, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function Layout() {
@@ -9,13 +10,40 @@ export default function Layout() {
   const auth = getAuth();
 
   useEffect(() => {
-    // Escuchar cambios en el estado de autenticación
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user); // Actualizar el estado si el usuario ha iniciado sesión
+    // Verificar si hay una sesión guardada
+    checkStoredSession();
+
+    // Suscribirse a cambios en el estado de autenticación
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Guardar la sesión
+        await AsyncStorage.setItem('userSession', JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName
+        }));
+        setIsLoggedIn(true);
+      } else {
+        // Eliminar la sesión guardada
+        await AsyncStorage.removeItem('userSession');
+        setIsLoggedIn(false);
+      }
     });
 
-    return () => unsubscribe(); // Limpiar la suscripción
+    return () => unsubscribe();
   }, []);
+
+  const checkStoredSession = async () => {
+    try {
+      const session = await AsyncStorage.getItem('userSession');
+      if (session) {
+        const userData = JSON.parse(session);
+        setIsLoggedIn(true);
+      }
+    } catch (error) {
+      console.error('Error al verificar la sesión guardada:', error);
+    }
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -135,7 +135,7 @@ const ParkingScreen = () => {
         <Text style={styles.title}>Estacionamientos</Text>
         <FlatList
           data={parkings.filter((parking) => parking.status !== "ocupado")}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item?.id || Math.random().toString()}
           numColumns={3}
           renderItem={({ item }) => (
             <View style={styles.parkingItem}>
