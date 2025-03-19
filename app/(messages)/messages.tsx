@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
-import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '../../lib/firebase';
 import { MaterialIcons } from '@expo/vector-icons';
 
 interface Message {
   id: string;
   message: string;
-  timestamp: Date;
-  read: boolean;
+  timestamp: any;
   fromAdmin: boolean;
   userId: string;
   userEmail: string;
+  response?: string;
+  responseTimestamp?: any;
 }
 
 export default function MessagesScreen() {
@@ -23,20 +24,20 @@ export default function MessagesScreen() {
     const user = auth.currentUser;
     if (!user) return;
 
-    // Crear query para obtener mensajes del usuario actual
     const messagesRef = collection(db, 'messages');
     const q = query(messagesRef, where('userId', '==', user.uid));
 
-    // Suscribirse a cambios en tiempo real
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const messageList = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate(),
       })) as Message[];
 
-      // Ordenar mensajes por fecha (más recientes primero)
-      messageList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      messageList.sort((a, b) => {
+        const aTime = a.timestamp?.toDate?.()?.getTime() || 0;
+        const bTime = b.timestamp?.toDate?.()?.getTime() || 0;
+        return aTime - bTime;
+      });
       
       setMessages(messageList);
       setLoading(false);
@@ -44,17 +45,6 @@ export default function MessagesScreen() {
 
     return () => unsubscribe();
   }, []);
-
-  const markAsRead = async (messageId: string) => {
-    try {
-      const messageRef = doc(db, 'messages', messageId);
-      await updateDoc(messageRef, {
-        read: true
-      });
-    } catch (error) {
-      console.error('Error al marcar mensaje como leído:', error);
-    }
-  };
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -66,7 +56,6 @@ export default function MessagesScreen() {
       await addDoc(collection(db, 'messages'), {
         message: newMessage.trim(),
         timestamp: serverTimestamp(),
-        read: false,
         fromAdmin: false,
         userId: user.uid,
         userEmail: user.email
@@ -78,31 +67,43 @@ export default function MessagesScreen() {
   };
 
   const renderMessage = ({ item }: { item: Message }) => (
-    <TouchableOpacity 
-      style={[
-        styles.messageCard,
-        !item.read && styles.unreadMessage
-      ]}
-      onPress={() => markAsRead(item.id)}
-    >
-      <View style={styles.messageHeader}>
-        <MaterialIcons 
-          name={item.fromAdmin ? "admin-panel-settings" : "message"} 
-          size={24} 
-          color="#7e57c2" 
-        />
-        <Text style={styles.timestamp}>
-          {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
-        </Text>
+    <View style={[
+      styles.messageContainer,
+      item.fromAdmin ? styles.adminMessageContainer : styles.userMessageContainer
+    ]}>
+      <View style={[
+        styles.messageBubble,
+        item.fromAdmin ? styles.adminBubble : styles.userBubble
+      ]}>
+        <View style={styles.messageContent}>
+          <Text style={item.fromAdmin ? styles.adminMessageText : styles.messageText}>{item.message}</Text>
+          <Text style={[
+            styles.timestamp,
+            item.fromAdmin ? { color: '#666' } : { color: '#fff' }
+          ]}>
+            {item.timestamp?.toDate?.()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || 'Sin fecha'}
+          </Text>
+        </View>
       </View>
-      <Text style={styles.messageText}>{item.message}</Text>
-    </TouchableOpacity>
+      {item.response && (
+        <View style={styles.responseContainer}>
+          <View style={styles.adminBubble}>
+            <View style={styles.messageContent}>
+              <Text style={styles.adminMessageText}>{item.response}</Text>
+              <Text style={[styles.timestamp, { color: '#666' }]}>
+                {item.responseTimestamp?.toDate?.()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || 'Sin fecha'}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
+    </View>
   );
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <Text>Cargando mensajes...</Text>
+        <Text style={styles.loadingText}>Cargando mensajes...</Text>
       </View>
     );
   }
@@ -117,10 +118,12 @@ export default function MessagesScreen() {
         renderItem={renderMessage}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContainer}
+        inverted={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <MaterialIcons name="message" size={48} color="#7e57c2" />
+            <MaterialIcons name="message" size={48} color="#4CAF50" />
             <Text style={styles.emptyText}>No hay mensajes</Text>
+            <Text style={styles.emptySubText}>Envía un mensaje y te responderemos pronto</Text>
           </View>
         }
       />
@@ -134,14 +137,17 @@ export default function MessagesScreen() {
           multiline
         />
         <TouchableOpacity 
-          style={styles.sendButton}
+          style={[
+            styles.sendButton,
+            !newMessage.trim() && styles.sendButtonDisabled
+          ]}
           onPress={sendMessage}
           disabled={!newMessage.trim()}
         >
           <MaterialIcons 
             name="send" 
             size={24} 
-            color={newMessage.trim() ? "#7e57c2" : "#ccc"} 
+            color={newMessage.trim() ? "#4CAF50" : "#ccc"} 
           />
         </TouchableOpacity>
       </View>
@@ -154,40 +160,70 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 20,
+  },
   listContainer: {
     padding: 16,
-    paddingBottom: 80, // Espacio para el input
+    paddingBottom: 80,
   },
-  messageCard: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
+  messageContainer: {
+    marginVertical: 4,
+    paddingHorizontal: 16,
+    width: '100%',
+  },
+  userMessageContainer: {
+    alignItems: 'flex-end',
+  },
+  adminMessageContainer: {
+    alignItems: 'flex-start',
+  },
+  messageBubble: {
+    maxWidth: '80%',
+    padding: 12,
+    borderRadius: 16,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  unreadMessage: {
-    backgroundColor: '#f3e5f5',
-    borderLeftWidth: 4,
-    borderLeftColor: '#7e57c2',
+  userBubble: {
+    backgroundColor: '#4CAF50',
+    borderBottomRightRadius: 4,
   },
-  messageHeader: {
+  adminBubble: {
+    backgroundColor: '#e0e0e0',
+    borderBottomLeftRadius: 4,
+  },
+  messageContent: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  timestamp: {
-    marginLeft: 8,
-    color: '#666',
-    fontSize: 12,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
   },
   messageText: {
     fontSize: 16,
+    color: '#fff',
+    lineHeight: 20,
+    marginRight: 8,
+  },
+  adminMessageText: {
+    fontSize: 16,
     color: '#333',
-    lineHeight: 24,
+    lineHeight: 20,
+    marginRight: 8,
+  },
+  timestamp: {
+    fontSize: 12,
+    marginTop: 0,
+    marginLeft: 4,
+  },
+  responseContainer: {
+    marginTop: 8,
+    width: '100%',
   },
   emptyContainer: {
     flex: 1,
@@ -197,8 +233,15 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     marginTop: 16,
-    fontSize: 16,
+    fontSize: 18,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  emptySubText: {
+    marginTop: 8,
+    fontSize: 14,
     color: '#666',
+    textAlign: 'center',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -228,5 +271,8 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: '#f5f5f5',
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
   },
 }); 

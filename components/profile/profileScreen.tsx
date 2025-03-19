@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ImageBackground,
+  Linking,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { auth } from "../../lib/firebase";
@@ -92,33 +93,112 @@ const ProfileScreen = () => {
       return;
     }
 
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permiso denegado", "Necesitas permitir el acceso a la galería para cambiar la imagen.");
-      return;
-    }
+    try {
+      // Solicitar permisos de la galería
+      const { status: galleryStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (galleryStatus !== "granted") {
+        Alert.alert(
+          "Permiso denegado",
+          "Necesitas permitir el acceso a la galería para cambiar la imagen.",
+          [
+            { text: "Cancelar", style: "cancel" },
+            { 
+              text: "Configuración", 
+              onPress: () => Linking.openSettings() 
+            }
+          ]
+        );
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+      // Solicitar permisos de la cámara
+      const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+      if (cameraStatus !== "granted") {
+        Alert.alert(
+          "Permiso denegado",
+          "Necesitas permitir el acceso a la cámara para tomar fotos.",
+          [
+            { text: "Cancelar", style: "cancel" },
+            { 
+              text: "Configuración", 
+              onPress: () => Linking.openSettings() 
+            }
+          ]
+        );
+        return;
+      }
 
-    if (!result.canceled) {
-      try {
-        setLoading(true);
-        await updateProfile(user, { photoURL: result.assets[0].uri });
-        setProfileImage(result.assets[0].uri);
-        Alert.alert("Éxito", "Imagen de perfil actualizada correctamente.");
-      } catch (error) {
-        if (error instanceof Error) {
-          Alert.alert("Error", error.message);
-        } else {
-          Alert.alert("Error", "Ocurrió un error inesperado.");
-        }
-      } finally {
-        setLoading(false);
+      // Mostrar opciones para elegir imagen
+      Alert.alert(
+        "Cambiar foto de perfil",
+        "¿Cómo deseas cambiar tu foto?",
+        [
+          {
+            text: "Galería",
+            onPress: async () => {
+              const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+              });
+
+              if (!result.canceled) {
+                setLoading(true);
+                try {
+                  await updateProfile(user, { photoURL: result.assets[0].uri });
+                  setProfileImage(result.assets[0].uri);
+                  Alert.alert("Éxito", "Imagen de perfil actualizada correctamente.");
+                } catch (error) {
+                  if (error instanceof Error) {
+                    Alert.alert("Error", error.message);
+                  } else {
+                    Alert.alert("Error", "Ocurrió un error al actualizar la imagen.");
+                  }
+                } finally {
+                  setLoading(false);
+                }
+              }
+            }
+          },
+          {
+            text: "Cámara",
+            onPress: async () => {
+              const result = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+              });
+
+              if (!result.canceled) {
+                setLoading(true);
+                try {
+                  await updateProfile(user, { photoURL: result.assets[0].uri });
+                  setProfileImage(result.assets[0].uri);
+                  Alert.alert("Éxito", "Imagen de perfil actualizada correctamente.");
+                } catch (error) {
+                  if (error instanceof Error) {
+                    Alert.alert("Error", error.message);
+                  } else {
+                    Alert.alert("Error", "Ocurrió un error al actualizar la imagen.");
+                  }
+                } finally {
+                  setLoading(false);
+                }
+              }
+            }
+          },
+          {
+            text: "Cancelar",
+            style: "cancel"
+          }
+        ]
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message);
+      } else {
+        Alert.alert("Error", "Ocurrió un error inesperado.");
       }
     }
   };
@@ -226,7 +306,7 @@ const ProfileScreen = () => {
               style={styles.profileImage}
             />
             <TouchableOpacity style={styles.editIcon} onPress={handleUpdateProfileImage}>
-              <Ionicons name="camera" size={24} color="#FFF" />
+              <Ionicons name="camera" size={18} color="#FFF" />
             </TouchableOpacity>
 
             {/* Botón de Cerrar Sesión */}
@@ -238,11 +318,12 @@ const ProfileScreen = () => {
 
           <View style={styles.infoContainer}>
             <View style={styles.nameContainer}>
-              <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+              <Text style={styles.title}>
                 {user.displayName || "Sin nombre"}
               </Text>
               <TouchableOpacity style={styles.editName} onPress={() => setNameModalVisible(true)}>
-                <MaterialIcons name="drive-file-rename-outline" size={24} color="white" />
+                <Ionicons name="pencil" size={16} color="#FFF" />
+                <Text style={styles.editNameText}>Editar</Text>
               </TouchableOpacity>
             </View>
 
@@ -334,6 +415,7 @@ const styles = StyleSheet.create({
     marginRight: 15,
     position: "relative",
     alignItems: "center",
+    marginBottom: 80,
   },
   profileImage: {
     width: 100,
@@ -342,22 +424,32 @@ const styles = StyleSheet.create({
   },
   editIcon: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#7E57C2",
-    borderRadius: 15,
-    padding: 5,
+    bottom: -2,
+    right: -2,
+    backgroundColor: "#4CAF50",
+    borderRadius: 6,
+    padding: 1.5,
+    borderWidth: 1.5,
+    borderColor: "#FFF",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   signOutButton: {
     backgroundColor: "#BF360C",
     borderRadius: 8,
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
-    marginTop: 10,
+    position: "absolute",
+    bottom: -65,
+    left: 0,
+    right: 0,
   },
   signOutText: {
     color: "#FFF",
@@ -365,33 +457,43 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flex: 1,
+    marginBottom: 10,
   },
   nameContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 15,
+    justifyContent: "space-between",
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#FFF",
-    flexShrink: 1,
+    flex: 1,
+    marginRight: 10,
   },
   editName: {
     backgroundColor: "#7E57C2",
-    borderRadius: 15,
-    padding: 5,
-    marginLeft: 10,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  editNameText: {
+    color: "#FFF",
+    fontSize: 12,
   },
   label: {
     fontSize: 14,
     color: "#FFF",
-    marginBottom: 2,
+    marginBottom: 5,
   },
   emailText: {
     fontSize: 14,
     color: "#B39DDB",
-    marginBottom: 10,
+    marginBottom: 15,
     flexShrink: 1,
   },
   changePasswordButton: {
@@ -403,7 +505,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
-    marginBottom: 10,
   },
   changePasswordText: {
     color: "#FFF",
